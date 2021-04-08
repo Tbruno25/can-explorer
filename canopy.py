@@ -2,18 +2,13 @@ from PyQt5.QtWidgets import QApplication, QScrollArea
 from pyqtgraph.Qt import QtCore, QtGui
 from collections import defaultdict, deque
 from random import randint
+import config as cf
 import pyqtgraph as pg
 import can
 
 
-bus_type = "socketcan"
-channel = "vcan0"
-baud = 500_000
-buffer_len = 250
-
-
 class Listener(can.Listener):
-    recorded = defaultdict(lambda: deque([0] * buffer_len, maxlen=buffer_len))
+    recorded = defaultdict(lambda: deque([0] * cf.buffer_len, maxlen=cf.buffer_len))
 
     def on_message_received(self, msg):
         val = int.from_bytes(msg.data, byteorder="big")
@@ -23,7 +18,9 @@ class Listener(can.Listener):
 class CanoPy:
     def __init__(self, rate=0.05):
         # CAN
-        self.bus = can.interface.Bus(bustype=bus_type, channel=channel, bitrate=baud)
+        self.bus = can.interface.Bus(
+            bustype=cf.bus_type, channel=cf.channel, bitrate=cf.baud
+        )
         self.listener = Listener()
         self.notifier = can.Notifier(self.bus, [self.listener])
         self.messages = self.listener.recorded
@@ -39,7 +36,7 @@ class CanoPy:
         self.scroll.show()
 
         # Plotting
-        self.x = list(range(buffer_len))
+        self.x = list(range(cf.buffer_len))
         self.plots = {}
         self.obj = []
         self.ignore = []
