@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QScrollArea, QPushButton
+from PyQt5.QtWidgets import QApplication, QScrollArea
 from pyqtgraph.Qt import QtCore, QtGui
 from collections import defaultdict, deque
 from random import randint
