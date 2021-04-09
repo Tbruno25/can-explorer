@@ -1,4 +1,6 @@
-bus_type = "socketcan"
+### Refer to doc below for parameters
+### https://python-can.readthedocs.io/en/master/configuration.html#incode
+
+interface = "socketcan"
 channel = "vcan0"
-baud = 500_000
-buffer_len = 250
+bitrate = 500_000
