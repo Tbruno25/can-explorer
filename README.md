@@ -17,6 +17,7 @@ Edit `config.py` with the corresponding settings for your adapter. Refer to the 
 Run `canopy.py` to view a real time plot for each id.
 
 Press `i` on your keyboard to ignore all currently displayed id's.
+Use `arrow up` or `arrow down` to adjust message buffer size. 
 
 ## Screenshot 
 
