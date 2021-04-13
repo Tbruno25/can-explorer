@@ -81,6 +81,7 @@ class CanoPy:
     def add_plot(self, id_):
         plt = self.layout.addPlot(row=len(self.plots), col=0, height=self.plt_height)
         plt.setMouseEnabled(x=False, y=False)
+        plt.setMenuEnabled(False)
         plt.addLegend()
         plt.hideAxis("left")
         plt.hideAxis("bottom")
