@@ -35,6 +35,11 @@ class PlotWidget(pg.PlotWidget):
         self.hideAxis("left")
         self.hideAxis("bottom")
         self.setFixedHeight(75)
+        self.pen = self.rand_pen()
+
+    def rand_pen(self):
+        r, g, b = [randint(0, 255) for _ in range(3)]
+        return pg.mkPen(color=(r, g, b), width=2)
 
 
 class CanoPy:
@@ -71,6 +76,7 @@ class CanoPy:
         self.scroll.setWidget(self.widget)
 
         self.window.setCentralWidget(self.scroll)
+        self.window.setMinimumWidth(400)
         self.window.setWindowTitle("CanoPy")
         self.window.show()
 
@@ -84,7 +90,7 @@ class CanoPy:
         # Plotting
         self.set_x_axis()
         self.plots = {}
-        self.obj = []
+        self.rows = []
         self.ignore = []
         self.plt_height = 75
 
@@ -107,8 +113,9 @@ class CanoPy:
     def add_plot(self, id_):
         label = QLabel(hex(id_))
         plt = PlotWidget()
-        self.obj.append(plt)
-        self.plots[id_] = plt.plot(name=hex(id_), pen=self.rand_pen())
+        row = (label, plt)
+        self.rows.append((label, plt))
+        self.plots[id_] = plt.plot(pen=self.rand_pen())
         self.layout.addWidget(label, len(self.plots), 0)
         self.layout.addWidget(plt, len(self.plots), 1)
         return
@@ -129,9 +136,10 @@ class CanoPy:
 
     def ignore_current(self):
         self.ignore += list(self.buffer)
-        for plt in self.obj:
-            self.layout.removeItem(plt)
-        self.obj.clear()
+        for row in self.rows:
+            for i in row:
+                self.layout.removeWidget(i)
+        self.rows.clear()
         return
 
     def scale_buffer_size(self, increase: bool):
