@@ -61,7 +61,7 @@ class CanoPy:
         self.window = QWidget()
         self.layout = QGridLayout()
         self.window.setLayout(self.layout)
-        self.layout.keyPressEvent = self.key_pressed
+        self.window.keyPressEvent = self.key_pressed
         # self.scroll = QScrollArea()
         # self.scroll.setWidgetResizable(True)
         # self.scroll.setWidget(self.window)
