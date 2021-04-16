@@ -42,6 +42,14 @@ class PlotWidget(pg.PlotWidget):
         return pg.mkPen(color=(r, g, b), width=2)
 
 
+class Label(QLabel):
+    font = QtGui.QFont("Helvetica", 15)
+
+    def set_style(self):
+        self.setFont(self.font)
+        self.setAlignment(QtCore.Qt.AlignCenter)
+
+
 class CanoPy:
     def __init__(self, rate=0.05, buffer_length=200):
         # Buffer
@@ -66,8 +74,6 @@ class CanoPy:
         self.window = QMainWindow()
 
         self.layout = QGridLayout()
-
-        self.font = QtGui.QFont("Helvetica", 15)
 
         self.widget = QWidget()
         self.widget.setLayout(self.layout)
@@ -113,9 +119,8 @@ class CanoPy:
         return
 
     def add_plot(self, id_):
-        label = QLabel(hex(id_))
-        label.setFont(self.font)
-        label.setAlignment(QtCore.Qt.AlignCenter)
+        label = Label(hex(id_))
+        label.set_style()
         plt = PlotWidget()
         row = (label, plt)
         self.rows.append(row)
