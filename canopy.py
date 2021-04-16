@@ -28,13 +28,15 @@ class Listener(can.Listener):
 
 
 class PlotWidget(pg.PlotWidget):
+    height = 75  # px
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setMenuEnabled(False)
         self.setMouseEnabled(x=False, y=False)
         self.hideAxis("left")
         self.hideAxis("bottom")
-        self.setFixedHeight(75)
+        self.setFixedHeight(self.height)
         self.pen = self.rand_pen()
 
     def rand_pen(self):
@@ -101,7 +103,6 @@ class CanoPy:
         self.plots = {}
         self.rows = []
         self.ignore = []
-        self.plt_height = 75
 
         # Timer
         self.timer = QtCore.QTimer()
