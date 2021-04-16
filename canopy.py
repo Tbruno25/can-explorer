@@ -67,6 +67,8 @@ class CanoPy:
 
         self.layout = QGridLayout()
 
+        self.font = QtGui.QFont("Helvetica", 15)
+
         self.widget = QWidget()
         self.widget.setLayout(self.layout)
         self.widget.keyPressEvent = self.key_pressed
@@ -112,6 +114,8 @@ class CanoPy:
 
     def add_plot(self, id_):
         label = QLabel(hex(id_))
+        label.setFont(self.font)
+        label.setAlignment(QtCore.Qt.AlignCenter)
         plt = PlotWidget()
         row = (label, plt)
         self.rows.append(row)
