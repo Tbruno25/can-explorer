@@ -33,7 +33,6 @@ class PlotWidget(pg.PlotWidget):
         self.setMouseEnabled(x=False, y=False)
         self.hideAxis("left")
         self.hideAxis("bottom")
-        self.addLegend()
         self.setFixedHeight(75)
 
 
@@ -99,9 +98,11 @@ class CanoPy:
         return
 
     def add_plot(self, id_):
+        label = QLabel(hex(id_))
         plt = PlotWidget()
         self.obj.append(plt)
         self.plots[id_] = plt.plot(name=hex(id_), pen=self.rand_pen())
+        self.layout.addWidget(label, len(self.plots), 0)
         self.layout.addWidget(plt, len(self.plots), 1)
         # adjusts scrollwheel
         # self.layout.setFixedHeight(self.plt_height * (len(self.obj) + 1))
