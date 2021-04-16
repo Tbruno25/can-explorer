@@ -21,7 +21,7 @@ Use `arrow up` or `arrow down` to adjust message buffer size.
 
 ## Screenshot 
 
-![](https://i.ibb.co/kJbf0ph/screenshot-from-2021-04-07-19.png)
+![](https://i.ibb.co/ynrNndq/Screenshot-from-2021-04-16-12-23-26.png)
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
