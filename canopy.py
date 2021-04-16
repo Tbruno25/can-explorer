@@ -1,4 +1,12 @@
-from PyQt5.QtWidgets import QApplication, QScrollArea
+from PyQt5.QtWidgets import (
+    QApplication,
+    QGridLayout,
+    QLabel,
+    QScrollArea,
+    QWidget,
+    QLayout,
+    QMainWindow,
+)
 from pyqtgraph.Qt import QtCore, QtGui
 from collections import defaultdict, deque
 from functools import partial
@@ -17,6 +25,21 @@ class Listener(can.Listener):
     def on_message_received(self, msg):
         val = int.from_bytes(msg.data, byteorder="big")
         self.buffer[msg.arbitration_id].append(val)
+
+
+class PlotWidget(pg.PlotWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.setMenuEnabled(False)
+        self.setMouseEnabled(x=False, y=False)
+        self.hideAxis("left")
+        self.hideAxis("bottom")
+        self.setFixedHeight(75)
+        self.pen = self.rand_pen()
+
+    def rand_pen(self):
+        r, g, b = [randint(0, 255) for _ in range(3)]
+        return pg.mkPen(color=(r, g, b), width=2)
 
 
 class CanoPy:
@@ -40,13 +63,24 @@ class CanoPy:
 
         # Application
         self.app = QApplication([])
-        self.layout = pg.GraphicsLayoutWidget()
-        self.layout.keyPressEvent = self.key_pressed
+        self.window = QMainWindow()
+
+        self.layout = QGridLayout()
+
+        self.font = QtGui.QFont("Helvetica", 15)
+
+        self.widget = QWidget()
+        self.widget.setLayout(self.layout)
+        self.widget.keyPressEvent = self.key_pressed
+
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setWidget(self.layout)
-        self.scroll.setWindowTitle("CanoPy")
-        self.scroll.show()
+        self.scroll.setWidget(self.widget)
+
+        self.window.setCentralWidget(self.scroll)
+        self.window.setMinimumWidth(400)
+        self.window.setWindowTitle("CanoPy")
+        self.window.show()
 
         # Key Actions
         self.key_actions = {
@@ -58,7 +92,7 @@ class CanoPy:
         # Plotting
         self.set_x_axis()
         self.plots = {}
-        self.obj = []
+        self.rows = []
         self.ignore = []
         self.plt_height = 75
 
@@ -79,16 +113,15 @@ class CanoPy:
         return
 
     def add_plot(self, id_):
-        plt = self.layout.addPlot(row=len(self.plots), col=0, height=self.plt_height)
-        plt.setMouseEnabled(x=False, y=False)
-        plt.setMenuEnabled(False)
-        plt.addLegend()
-        plt.hideAxis("left")
-        plt.hideAxis("bottom")
-        self.obj.append(plt)
-        self.plots[id_] = plt.plot(name=hex(id_), pen=self.rand_pen())
-        # adjusts scrollwheel
-        self.layout.setFixedHeight(self.plt_height * (len(self.obj) + 1))
+        label = QLabel(hex(id_))
+        label.setFont(self.font)
+        label.setAlignment(QtCore.Qt.AlignCenter)
+        plt = PlotWidget()
+        row = (label, plt)
+        self.rows.append(row)
+        self.plots[id_] = plt.plot(pen=plt.pen)
+        self.layout.addWidget(label, len(self.plots), 0)
+        self.layout.addWidget(plt, len(self.plots), 1)
         return
 
     def update_plots(self):
@@ -107,9 +140,10 @@ class CanoPy:
 
     def ignore_current(self):
         self.ignore += list(self.buffer)
-        for plt in self.obj:
-            self.layout.removeItem(plt)
-        self.obj.clear()
+        for row in self.rows:
+            for i in row:
+                self.layout.removeWidget(i)
+        self.rows.clear()
         return
 
     def scale_buffer_size(self, increase: bool):
