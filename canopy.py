@@ -114,8 +114,8 @@ class CanoPy:
         label = QLabel(hex(id_))
         plt = PlotWidget()
         row = (label, plt)
-        self.rows.append((label, plt))
-        self.plots[id_] = plt.plot(pen=self.rand_pen())
+        self.rows.append(row)
+        self.plots[id_] = plt.plot(pen=plt.pen)
         self.layout.addWidget(label, len(self.plots), 0)
         self.layout.addWidget(plt, len(self.plots), 1)
         return
