@@ -58,20 +58,21 @@ class CanoPy:
 
         # Application
         self.app = QApplication([])
-        self.main = QMainWindow()
-        self.window = QWidget()
-        self.scroll = QScrollArea()
+        self.window = QMainWindow()
+
         self.layout = QGridLayout()
-        self.window.setLayout(self.layout)
+
+        self.widget = QWidget()
+        self.widget.setLayout(self.layout)
+        self.widget.keyPressEvent = self.key_pressed
+
+        self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setWidget(self.window)
-        self.main.setCentralWidget(self.scroll)
-        self.window.keyPressEvent = self.key_pressed
-        # self.scroll = QScrollArea()
-        # self.scroll.setWidgetResizable(True)
-        # self.scroll.setWidget(self.window)
-        # self.scroll.setWindowTitle("CanoPy")
-        self.main.show()
+        self.scroll.setWidget(self.widget)
+
+        self.window.setCentralWidget(self.scroll)
+        self.window.setWindowTitle("CanoPy")
+        self.window.show()
 
         # Key Actions
         self.key_actions = {
