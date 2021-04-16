@@ -139,10 +139,6 @@ class CanoPy:
             self.plots[id_].setData(self.x, data)
         return
 
-    def rand_pen(self):
-        r, g, b = [randint(0, 255) for _ in range(3)]
-        return pg.mkPen(color=(r, g, b), width=2)
-
     def ignore_current(self):
         self.ignore += list(self.buffer)
         for row in self.rows:
