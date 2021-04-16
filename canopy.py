@@ -1,4 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QScrollArea
+from PyQt5.QtWidgets import (
+    QApplication,
+    QGridLayout,
+    QLabel,
+    QScrollArea,
+    QWidget,
+    QMainWindow,
+)
 from pyqtgraph.Qt import QtCore, QtGui
 from collections import defaultdict, deque
 from functools import partial
@@ -17,6 +24,17 @@ class Listener(can.Listener):
     def on_message_received(self, msg):
         val = int.from_bytes(msg.data, byteorder="big")
         self.buffer[msg.arbitration_id].append(val)
+
+
+class PlotWidget(pg.PlotWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        self.setMenuEnabled(False)
+        self.setMouseEnabled(x=False, y=False)
+        self.hideAxis("left")
+        self.hideAxis("bottom")
+        self.addLegend()
+        self.setFixedHeight(75)
 
 
 class CanoPy:
@@ -40,13 +58,15 @@ class CanoPy:
 
         # Application
         self.app = QApplication([])
-        self.layout = pg.GraphicsLayoutWidget()
+        self.window = QWidget()
+        self.layout = QGridLayout()
+        self.window.setLayout(self.layout)
         self.layout.keyPressEvent = self.key_pressed
         self.scroll = QScrollArea()
         self.scroll.setWidgetResizable(True)
-        self.scroll.setWidget(self.layout)
+        self.scroll.setWidget(self.window)
         self.scroll.setWindowTitle("CanoPy")
-        self.scroll.show()
+        self.window.show()
 
         # Key Actions
         self.key_actions = {
@@ -79,16 +99,12 @@ class CanoPy:
         return
 
     def add_plot(self, id_):
-        plt = self.layout.addPlot(row=len(self.plots), col=0, height=self.plt_height)
-        plt.setMouseEnabled(x=False, y=False)
-        plt.setMenuEnabled(False)
-        plt.addLegend()
-        plt.hideAxis("left")
-        plt.hideAxis("bottom")
+        plt = PlotWidget()
         self.obj.append(plt)
         self.plots[id_] = plt.plot(name=hex(id_), pen=self.rand_pen())
+        self.layout.addWidget(plt, len(self.plots), 1)
         # adjusts scrollwheel
-        self.layout.setFixedHeight(self.plt_height * (len(self.obj) + 1))
+        # self.layout.setFixedHeight(self.plt_height * (len(self.obj) + 1))
         return
 
     def update_plots(self):
