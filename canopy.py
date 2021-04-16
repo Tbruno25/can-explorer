@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import (
     QLabel,
     QScrollArea,
     QWidget,
+    QLayout,
     QMainWindow,
 )
 from pyqtgraph.Qt import QtCore, QtGui
@@ -57,15 +58,20 @@ class CanoPy:
 
         # Application
         self.app = QApplication([])
+        self.main = QMainWindow()
         self.window = QWidget()
+        self.scroll = QScrollArea()
         self.layout = QGridLayout()
         self.window.setLayout(self.layout)
+        self.scroll.setWidgetResizable(True)
+        self.scroll.setWidget(self.window)
+        self.main.setCentralWidget(self.scroll)
         self.window.keyPressEvent = self.key_pressed
         # self.scroll = QScrollArea()
         # self.scroll.setWidgetResizable(True)
         # self.scroll.setWidget(self.window)
         # self.scroll.setWindowTitle("CanoPy")
-        self.window.show()
+        self.main.show()
 
         # Key Actions
         self.key_actions = {
@@ -104,8 +110,6 @@ class CanoPy:
         self.plots[id_] = plt.plot(name=hex(id_), pen=self.rand_pen())
         self.layout.addWidget(label, len(self.plots), 0)
         self.layout.addWidget(plt, len(self.plots), 1)
-        # adjusts scrollwheel
-        # self.layout.setFixedHeight(self.plt_height * (len(self.obj) + 1))
         return
 
     def update_plots(self):
