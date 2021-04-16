@@ -20,7 +20,7 @@ import config as cf
 class Listener(can.Listener):
     def __init__(self, buffer: defaultdict, *args, **kwargs):
         self.buffer = buffer
-        super().__init__()
+        super().__init__(*args, **kwargs)
 
     def on_message_received(self, msg):
         val = int.from_bytes(msg.data, byteorder="big")
@@ -29,7 +29,7 @@ class Listener(can.Listener):
 
 class PlotWidget(pg.PlotWidget):
     def __init__(self, *args, **kwargs):
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.setMenuEnabled(False)
         self.setMouseEnabled(x=False, y=False)
         self.hideAxis("left")
@@ -45,7 +45,8 @@ class PlotWidget(pg.PlotWidget):
 class Label(QLabel):
     font = QtGui.QFont("Helvetica", 15)
 
-    def set_style(self):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.setFont(self.font)
         self.setAlignment(QtCore.Qt.AlignCenter)
 
@@ -120,7 +121,6 @@ class CanoPy:
 
     def add_plot(self, id_):
         label = Label(hex(id_))
-        label.set_style()
         plt = PlotWidget()
         row = (label, plt)
         self.rows.append(row)
