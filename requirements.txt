@@ -1,8 +1,3 @@
-aenum==3.0.0
-numpy==1.20.2
-PyQt5==5.15.4
-PyQt5-Qt5==5.15.2
-PyQt5-sip==12.8.1
-pyqtgraph==0.12.1
-python-can==3.3.4
-wrapt==1.12.1
+PyQt5
+pyqtgraph
+python-can
