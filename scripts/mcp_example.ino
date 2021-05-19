@@ -1,4 +1,5 @@
 /*
+####################################################################################
 example sketch to use arduino as CAN interface over serial with python-can / CanoPy
 https://github.com/Tbruno25/canopy
 
@@ -9,6 +10,7 @@ don't forget to modify CanoPy config.py
     interface = "serial"
     channel = "COM1" #Windows OR "/dev/ttyACM0" #Linux 
     bitrate = 115200
+####################################################################################
 */
 
 #include <mcp_can.h>
