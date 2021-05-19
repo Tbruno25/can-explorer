@@ -64,7 +64,7 @@ class CanoPy:
         )
 
         # CAN
-        self.bus = can.interface.Bus(
+        self.bus = can.Bus(
             interface=cf.interface,
             channel=cf.channel,
             bitrate=cf.bitrate,
