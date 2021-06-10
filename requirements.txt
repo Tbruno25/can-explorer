@@ -1,3 +1,4 @@
 PyQt5
 pyqtgraph
 python-can
+pyserial
