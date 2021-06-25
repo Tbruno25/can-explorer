@@ -13,7 +13,9 @@ $ pip install .
 ## Usage
 
 Run `canopy` from the command line with the appropriate settings per your adapter. 
+
 For example `canopy -i socketcan -c can0 -b 500000`
+
 Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for more info.
 
 Press `i` on your keyboard to ignore all currently displayed id's.
