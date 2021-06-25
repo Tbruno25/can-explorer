@@ -7,14 +7,14 @@ Canopy is a visualization tool for plotting CAN bus message payloads.
 ```bash
 $ git clone https://github.com/Tbruno25/canopy
 # cd into the /canopy directory
-$ pip install -r requirements.txt
+$ pip install .
 ```
 
 ## Usage
 
-Edit `config.py` with the corresponding settings for your adapter. Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for more info.
-
-Run `canopy.py` to view a real time plot for each id.
+Run `canopy` from the command line with the appropriate settings per your adapter. 
+For example `canopy -i socketcan -c can0 -b 500000`
+Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for more info.
 
 Press `i` on your keyboard to ignore all currently displayed id's.
 Use `arrow up` or `arrow down` to adjust message buffer size. 
