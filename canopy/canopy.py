@@ -8,13 +8,13 @@ from PyQt5.QtWidgets import (
     QMainWindow,
 )
 from pyqtgraph.Qt import QtCore, QtGui
+from argparse import ArgumentParser
 from collections import defaultdict, deque
 from functools import partial
 from random import randint
+
 import pyqtgraph as pg
 import can
-
-import config as cf
 
 
 class Listener(can.Listener):
@@ -54,7 +54,7 @@ class Label(QLabel):
 
 
 class CanoPy:
-    def __init__(self, rate=0.05, buffer_length=200):
+    def __init__(self, bus, rate=0.05, buffer_length=200):
         # Buffer
         self.buf_len = buffer_length
         self.buf_int = 0.1
@@ -64,11 +64,7 @@ class CanoPy:
         )
 
         # CAN
-        self.bus = can.Bus(
-            interface=cf.interface,
-            channel=cf.channel,
-            bitrate=cf.bitrate,
-        )
+        self.bus = bus
         self.listener = Listener(self.buffer)
         self.notifier = can.Notifier(self.bus, [self.listener])
 
@@ -174,6 +170,27 @@ class CanoPy:
         self.app.exec_()
 
 
-if __name__ == "__main__":
-    canopy = CanoPy()
+def main():
+    parser = ArgumentParser(
+        description="""
+        Refer to the following doc for parameters | 
+        https://python-can.readthedocs.io/en/master/configuration.html#incode
+        """
+    )
+    parser.add_argument("-i", "--interface", type=str, required=True)
+    parser.add_argument("-c", "--channel", type=str, required=True)
+    parser.add_argument("-b", "--bitrate", type=int, default=0)
+    args = parser.parse_args()
+
+    canopy = CanoPy(
+        can.Bus(
+            interface=args.interface,
+            channel=args.channel,
+            bitrate=args.bitrate,
+        )
+    )
     canopy.run()
+
+
+if __name__ == "__main__":
+    main()
