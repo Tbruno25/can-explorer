@@ -6,10 +6,10 @@ https://github.com/Tbruno25/canopy
 mcp_can library | https://github.com/coryjfowler/MCP_CAN_lib
 default 500K baudrate / 8MHz clock speed
 
-don't forget to modify CanoPy config.py
-    interface = "serial"
-    channel = "COM1" #Windows OR "/dev/ttyACM0" #Linux 
-    bitrate = 115200
+channel = "COM1" #Windows OR "/dev/ttyACM0" #Linux 
+    
+example:
+    canopy -i serial -c COM1 -b 115200
 ####################################################################################
 */
 
