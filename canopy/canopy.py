@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import (
     QMainWindow,
 )
 from pyqtgraph.Qt import QtCore, QtGui
-from argparse import ArgumentParser
 from collections import defaultdict, deque
 from functools import partial
 from random import randint
@@ -168,29 +167,3 @@ class CanoPy:
 
     def run(self):
         self.app.exec_()
-
-
-def main():
-    parser = ArgumentParser(
-        description="""
-        Refer to the following doc for parameters | 
-        https://python-can.readthedocs.io/en/master/configuration.html#incode
-        """
-    )
-    parser.add_argument("-i", "--interface", type=str, required=True)
-    parser.add_argument("-c", "--channel", type=str, required=True)
-    parser.add_argument("-b", "--bitrate", type=int, default=0)
-    args = parser.parse_args()
-
-    canopy = CanoPy(
-        can.Bus(
-            interface=args.interface,
-            channel=args.channel,
-            bitrate=args.bitrate,
-        )
-    )
-    canopy.run()
-
-
-if __name__ == "__main__":
-    main()

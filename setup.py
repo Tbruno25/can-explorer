@@ -21,6 +21,6 @@ setup(
     ],
     entry_points="""
       [console_scripts]
-      canopy = canopy.canopy:main
+      canopy = canopy.cli:main
       """,
 )
