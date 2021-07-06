@@ -4,22 +4,42 @@ Canopy is a visualization tool for plotting CAN bus message payloads.
 
 ## Installation
 
-```bash
+```
 $ git clone https://github.com/Tbruno25/canopy
-# cd into the /canopy directory
+$ cd canopy
 $ pip install .
 ```
 
 ## Usage
 
-Run `canopy` from the command line with the appropriate settings per your adapter. 
+Run `canopy` from the command line with the appropriate arguments per your adapter.  
+Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for argument info.
 
-For example `canopy -i socketcan -c can0 -b 500000`
+```
+$ canopy -i socketcan -c can0 -b 500000
+```
 
-Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for more info.
+Pressing `i` on your keyboard will ignore and clear all currently displayed id's.  
+Using `arrow up` or `arrow down` will adjust message buffer sizes. 
 
-Press `i` on your keyboard to ignore all currently displayed id's.
-Use `arrow up` or `arrow down` to adjust message buffer size. 
+Alternatively, a saved log file can be visualized by redirecting the output to a virtual interface.
+
+First ensure the interface is up
+```
+$ sudo modprobe vcan
+$ sudo ip link add dev vcan0 type vcan
+$ sudo ip link set up vcan0
+```
+
+Then start CanoPy
+```
+$ canopy -i socketcan -c vcan0
+```
+
+And use `canplayer` to replay the log file while redirecting output
+```
+$ canplayer -I candump-messages.log vcan0=can0
+```
 
 ## Screenshot 
 
