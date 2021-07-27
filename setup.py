@@ -13,6 +13,7 @@ setup(
     license="MIT",
     packages=["canopy"],
     zip_safe=False,
+    python_requires='>3.6.0',
     install_requires=[
         "PyQT5",
         "pyqtgraph",
