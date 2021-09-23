@@ -49,6 +49,7 @@ $ canplayer -I candump-messages.log vcan0=can0
 
 - Display id's sorted from min to max
 - Add a way to remove specific id's 
+- Refactor to implement unit/integration tests
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
