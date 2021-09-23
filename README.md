@@ -45,5 +45,10 @@ $ canplayer -I candump-messages.log vcan0=can0
 
 ![](https://i.ibb.co/ynrNndq/Screenshot-from-2021-04-16-12-23-26.png)
 
+## Todo
+
+- Display id's sorted from min to max
+- Add a way to remove specific id's 
+
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
