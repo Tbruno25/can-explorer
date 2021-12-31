@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "canopy-viz"
+version = "0.1.2"
+description = "visualize CAN bus payloads in realtime"
+authors = ["TJ <tbruno25@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+pyqtgraph = "^0.12.3"
+pyserial = "^3.5"
+python-can = "^3.3.4"
+PyQt5 = "^5.15.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+
+[tool.poetry.scripts]
+canopy = "canopy_viz.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
