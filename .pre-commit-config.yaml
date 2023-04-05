@@ -1,0 +1,17 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 23.3.0
+    hooks:
+      - id: black
+        files: (?x)(^packages/|^common/scripts/hsm.py|^common/scripts/tests/)
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.0.261
+    hooks:
+      - id: ruff
+        args:
+          - --fix
+          - --exit-non-zero-on-fix
+          # Rules E & F applied by default
+          # https://github.com/charliermarsh/ruff/blob/main/README.md#supported-rules
+          - --extend-select=A,B,I,N,W
+          - --ignore=E501

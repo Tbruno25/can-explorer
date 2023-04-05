@@ -1,10 +1,12 @@
 from argparse import ArgumentParser
-from .canopy import can, CanoPy
+
+from .canopy import CanoPy, can
+
 
 def main():
     parser = ArgumentParser(
         description="""
-        Refer to the following doc for parameters | 
+        Refer to the following doc for parameters |
         https://python-can.readthedocs.io/en/master/configuration.html#incode
         """
     )
