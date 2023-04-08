@@ -4,14 +4,8 @@ from random import randint
 
 import can
 import pyqtgraph as pg
-from PyQt5.QtWidgets import (
-    QApplication,
-    QGridLayout,
-    QLabel,
-    QMainWindow,
-    QScrollArea,
-    QWidget,
-)
+from PyQt5.QtWidgets import (QApplication, QGridLayout, QLabel, QMainWindow,
+                             QScrollArea, QWidget)
 from pyqtgraph.Qt import QtCore, QtGui
 
 
