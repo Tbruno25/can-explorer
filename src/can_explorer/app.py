@@ -1,9 +1,9 @@
 import enum
 
+import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
-import can
 
 bus = None
 plot_manager = plotting.PlotManager()
@@ -33,11 +33,14 @@ def plot_height_input_callback(sender, app_data, user_data) -> None:
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
     global bus
 
-    bus = can.Bus(
-        interface=layout.get_settings_user_interface(),
-        channel=layout.get_settings_user_channel(),
-        bitrate=layout.get_settings_user_baudrate(),
-    )
+    try:
+        bus = can.Bus(
+            interface=layout.get_settings_user_interface(),
+            channel=layout.get_settings_user_channel(),
+            bitrate=layout.get_settings_user_baudrate(),
+        )
+    except Exception as e:
+        layout.popup_box("ERROR", e)
 
 
 dpg.create_context()

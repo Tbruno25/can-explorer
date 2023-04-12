@@ -166,6 +166,41 @@ def resize() -> None:
     dpg.set_item_width(Tag.SETTINGS_APPLY, dpg.get_viewport_width() // 4)
 
 
+def popup_box(title: str, message: str) -> None:
+    # https://github.com/hoffstadt/DearPyGui/discussions/1308
+
+    def show_info(title, message):
+        # guarantee these commands happen in the same frame
+        with dpg.mutex():
+            viewport_width = dpg.get_viewport_client_width()
+            viewport_height = dpg.get_viewport_client_height()
+
+            with dpg.window(label=title, modal=True, no_close=True) as modal_id:
+                dpg.add_text(message)
+                with dpg.group():
+                    dpg.add_button(
+                        label="Close",
+                        width=-1,
+                        user_data=(modal_id, True),
+                        callback=on_selection,
+                    )
+
+        # guarantee these commands happen in another frame
+        dpg.split_frame()
+        width = dpg.get_item_width(modal_id)
+        height = dpg.get_item_height(modal_id)
+        dpg.set_item_pos(
+            modal_id,
+            [viewport_width // 2 - width // 2, viewport_height // 2 - height // 2],
+        )
+
+    def on_selection(sender, unused, user_data):
+        # delete window
+        dpg.delete_item(user_data[0])
+
+    return show_info(title, message)
+
+
 def get_settings_user_interface() -> str:
     return dpg.get_value(Tag.SETTINGS_INTERFACE)
 
