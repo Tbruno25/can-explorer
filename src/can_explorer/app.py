@@ -3,8 +3,11 @@ import enum
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
+import can
 
+bus = None
 plot_manager = plotting.PlotManager()
+
 
 class State(enum.Flag):
     START = True
@@ -13,7 +16,7 @@ class State(enum.Flag):
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
     state = State(user_data)
-    dpg.configure_item(sender, label=state.name.capitalize(), user_data=not state)
+    dpg.configure_item(sender, label=state.name.capitalize(), user_data=not state)  # type: ignore[union-attr]
 
 
 def plot_scale_slider_callback(sender, app_data, user_data) -> None:
@@ -24,11 +27,17 @@ def plot_height_input_callback(sender, app_data, user_data) -> None:
     global plot_manager
     for plot in plot_manager.plots.values():
         for i in dpg.get_item_children(plot):
-            dpg.set_item_height(i, layout.get_settings_plot_height())
+            dpg.set_item_height(i, layout.get_settings_user_plot_height())
 
 
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
-    layout.get_settings_user_interface()
+    global bus
+
+    bus = can.Bus(
+        interface=layout.get_settings_user_interface(),
+        channel=layout.get_settings_user_channel(),
+        bitrate=layout.get_settings_user_baudrate(),
+    )
 
 
 dpg.create_context()

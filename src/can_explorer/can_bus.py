@@ -27,7 +27,7 @@ class _PayloadBuffer(deque):
 
 
 class Recorder:
-    data = defaultdict(_PayloadBuffer)
+    data: defaultdict[int, _PayloadBuffer] = defaultdict(_PayloadBuffer)
 
     def __init__(self, bus: bus.BusABC):
         notifier.Notifier(bus, [_Listener(self.data)])

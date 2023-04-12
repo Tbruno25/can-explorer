@@ -1,7 +1,7 @@
 import math
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Generator, Iterable
 
 import dearpygui.dearpygui as dpg
 
@@ -47,10 +47,7 @@ class RowItem:
 
 class PlotManager:
     height = DEFAULT_PLOT_HEIGHT
-    plots = {}
-
-    def __init__(self):
-        ...
+    plots: dict[str, RowItem] = {}
 
     def _make_label(self, id: int | str) -> int:
         return dpg.add_button(
@@ -77,7 +74,7 @@ class PlotManager:
 
     @staticmethod
     @contextmanager
-    def _make_row() -> RowItem:
+    def _make_row() -> Generator:
         row = RowItem(PlotTable())
         try:
             yield row
