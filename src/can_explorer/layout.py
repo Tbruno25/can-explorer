@@ -1,4 +1,5 @@
 from enum import Enum, auto, unique
+from pathlib import Path
 from typing import Callable, Final, Iterable
 
 import dearpygui.dearpygui as dpg
@@ -7,6 +8,8 @@ WIDTH: Final = 600
 HEIGHT: Final = 600
 
 DEFAULT_PLOT_HEIGHT: Final = 100
+
+RESOURCES_DIR = Path(__file__).parents[2] / "resources"
 
 
 @unique
@@ -75,6 +78,12 @@ class PlotTable(PercentageWidthTableRow):
         return super().add_widget(uuid, percentage)
 
 
+def _init_fonts():
+    with dpg.font_registry():
+        default = dpg.add_font(RESOURCES_DIR / "NotoSerifCJKjp-Medium.otf", 20)
+        dpg.bind_font(default)
+
+
 def _header() -> None:
     def tab_callback(sender, app_data, user_data) -> None:
         current_tab = dpg.get_item_label(app_data)
@@ -109,7 +118,10 @@ def _footer() -> None:
             dpg.add_text("Plot Scale %")
             dpg.add_spacer()
             dpg.add_slider_int(
-                tag=Tag.PLOT_SCALE_SLIDER, width=-1, default_value=50, format=""
+                tag=Tag.PLOT_SCALE_SLIDER,
+                width=-1,
+                default_value=50,
+                format="",
             )
         dpg.add_spacer(height=2)
 
@@ -154,6 +166,7 @@ def _settings_tab() -> None:
 
 
 def create() -> None:
+    # _init_fonts()
     _header()
     _body()
     _footer()
