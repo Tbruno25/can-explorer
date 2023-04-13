@@ -1,7 +1,7 @@
 import math
 from contextlib import contextmanager
 from dataclasses import dataclass
-from typing import Generator, Iterable
+from typing import Generator, Iterable, Optional, Union
 
 import dearpygui.dearpygui as dpg
 
@@ -41,15 +41,15 @@ class PlotData(str):
 @dataclass
 class RowItem:
     table: PlotTable
-    label: PlotLabel | None = None
-    plot: PlotData | None = None
+    label: Optional[PlotLabel] = None
+    plot: Optional[PlotData] = None
 
 
 class PlotManager:
     height = DEFAULT_PLOT_HEIGHT
-    plots: dict[str, RowItem] = {}
+    plots: dict[Union[int, str], RowItem] = {}
 
-    def _make_label(self, id: int | str) -> int:
+    def _make_label(self, id: Union[int, str]) -> int:
         return dpg.add_button(
             tag=f"{Tag.PLOT_LABEL}{dpg.generate_uuid()}",
             label=id,
@@ -83,7 +83,7 @@ class PlotManager:
             row.table.add_widget(row.plot)
             row.table.submit()
 
-    def add_plot(self, id: int | str, payload: Iterable) -> None:
+    def add_plot(self, id: Union[int, str], payload: Iterable) -> None:
         with self._make_row() as row_item:
             row_item.label = self._make_label(id)
             row_item.plot = self._make_plot(payload)
