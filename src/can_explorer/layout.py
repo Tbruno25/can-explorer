@@ -217,20 +217,20 @@ def get_settings_user_plot_height() -> int:
     return dpg.get_value(Tag.SETTINGS_PLOT_HEIGHT)
 
 
-def set_main_button_callback(callable: Callable) -> None:
-    dpg.configure_item(Tag.MAIN_BUTTON, callback=callable)
+def set_main_button_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.MAIN_BUTTON, callback=callback)
 
 
-def set_plot_scale_slider_callback(callable: Callable) -> None:
-    dpg.configure_item(Tag.PLOT_SCALE_SLIDER, callback=callable)
+def set_plot_scale_slider_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.PLOT_SCALE_SLIDER, callback=callback)
 
 
-def set_settings_apply_button_callback(callable: Callable) -> None:
-    dpg.configure_item(Tag.SETTINGS_APPLY, callback=callable)
+def set_settings_apply_button_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_APPLY, callback=callback)
 
 
-def set_settings_plot_height_callback(callable: Callable) -> None:
-    dpg.configure_item(Tag.SETTINGS_PLOT_HEIGHT, callback=callable)
+def set_settings_plot_height_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_PLOT_HEIGHT, callback=callback)
 
 
 def set_settings_interface_options(iterable: Iterable[str]) -> None:

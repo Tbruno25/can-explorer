@@ -1,5 +1,5 @@
 from collections import defaultdict, deque
-from typing import Final
+from typing import DefaultDict, Final
 
 from can import bus, interfaces, listener, notifier
 
@@ -27,7 +27,7 @@ class _PayloadBuffer(deque):
 
 
 class Recorder:
-    data: defaultdict[int, _PayloadBuffer] = defaultdict(_PayloadBuffer)
+    data: DefaultDict[int, _PayloadBuffer] = defaultdict(_PayloadBuffer)
 
     def __init__(self, bus: bus.BusABC):
         notifier.Notifier(bus, [_Listener(self.data)])
