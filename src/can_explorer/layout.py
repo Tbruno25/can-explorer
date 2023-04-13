@@ -1,15 +1,18 @@
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Callable, Final, Iterable
+from typing import Callable, Final, Iterable, Union
 
 import dearpygui.dearpygui as dpg
 
 WIDTH: Final = 600
 HEIGHT: Final = 600
 
+DEFAULT_FONT_HEIGHT: Final = 14
 DEFAULT_PLOT_HEIGHT: Final = 100
 
 RESOURCES_DIR = Path(__file__).parents[2] / "resources"
+
+font = None
 
 
 @unique
@@ -19,6 +22,7 @@ class Tag(str, Enum):
     FOOTER = auto()
     PLOT_SCALE_SLIDER = auto()
     MAIN_BUTTON = auto()
+    CLEAR_BUTTON = auto()
     PLOT_LABEL = auto()
     PLOT_DATA = auto()
     TAB_VIEWER = auto()
@@ -79,9 +83,13 @@ class PlotTable(PercentageWidthTableRow):
 
 
 def _init_fonts():
+    global font
+
     with dpg.font_registry():
-        default = dpg.add_font(RESOURCES_DIR / "NotoSerifCJKjp-Medium.otf", 20)
+        default = dpg.add_font(RESOURCES_DIR / "Inter-Medium.ttf", DEFAULT_FONT_HEIGHT)
         dpg.bind_font(default)
+
+    font = default
 
 
 def _header() -> None:
@@ -127,9 +135,20 @@ def _footer() -> None:
 
         dpg.add_separator()
         dpg.add_spacer()
-        dpg.add_button(
-            tag=Tag.MAIN_BUTTON, label="Start", width=-1, height=50, user_data=False
-        )
+        with dpg.group(horizontal=True):
+            dpg.add_button(
+                tag=Tag.MAIN_BUTTON,
+                label="Start",
+                width=-100,
+                height=50,
+                user_data=False,
+            )
+            dpg.add_button(
+                tag=Tag.CLEAR_BUTTON,
+                label="Clear",
+                width=-1,
+                height=50,
+            )
 
 
 def _viewer_tab() -> None:
@@ -166,7 +185,7 @@ def _settings_tab() -> None:
 
 
 def create() -> None:
-    # _init_fonts()
+    _init_fonts()
     _header()
     _body()
     _footer()
@@ -179,7 +198,7 @@ def resize() -> None:
     dpg.set_item_width(Tag.SETTINGS_APPLY, dpg.get_viewport_width() // 4)
 
 
-def popup_error(name: str, info: str) -> None:
+def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> None:
     # https://github.com/hoffstadt/DearPyGui/discussions/1308
 
     def on_selection(sender, unused, user_data):
@@ -231,6 +250,10 @@ def get_settings_user_plot_height() -> int:
 
 def set_main_button_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.MAIN_BUTTON, callback=callback)
+
+
+def set_clear_button_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.CLEAR_BUTTON, callback=callback)
 
 
 def set_plot_scale_slider_callback(callback: Callable) -> None:

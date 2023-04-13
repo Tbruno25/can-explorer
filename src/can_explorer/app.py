@@ -19,6 +19,10 @@ def start_stop_button_callback(sender, app_data, user_data) -> None:
     dpg.configure_item(sender, label=state.name.capitalize(), user_data=not state)  # type: ignore[union-attr]
 
 
+def clear_button_callback(sender, app_data, user_data) -> None:
+    raise NotImplementedError
+
+
 def plot_scale_slider_callback(sender, app_data, user_data) -> None:
     raise NotImplementedError
 
@@ -55,6 +59,8 @@ layout.set_settings_baudrate_options(can_bus.BAUDRATES)
 layout.set_settings_apply_button_callback(settings_apply_button_callback)
 
 layout.set_main_button_callback(start_stop_button_callback)
+layout.set_clear_button_callback(clear_button_callback)
+
 layout.set_plot_scale_slider_callback(plot_scale_slider_callback)
 layout.set_settings_plot_height_callback(plot_height_input_callback)
 
@@ -68,7 +74,7 @@ layout.resize()
 
 plot_manager = plotting.PlotManager()
 for i in range(100, 126):
-    plot_manager.add_plot(str(i), "")
+    plot_manager.add_plot(i, "")
 
 
 dpg.show_viewport()
