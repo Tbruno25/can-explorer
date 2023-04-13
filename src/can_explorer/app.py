@@ -6,6 +6,7 @@ import dearpygui.dearpygui as dpg
 from can_explorer import can_bus, layout, plotting
 
 bus = None
+can_recorder = None
 plot_manager = plotting.PlotManager()
 
 
@@ -15,12 +16,30 @@ class State(enum.Flag):
 
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
+    global can_recorder
+
     state = State(user_data)
-    dpg.configure_item(sender, label=state.name.capitalize(), user_data=not state)  # type: ignore[union-attr]
+    is_active = not state
+    dpg.configure_item(sender, label=state.name.capitalize(), user_data=is_active)  # type: ignore[union-attr]
+
+    try:
+        if is_active:
+            for i in range(100, 126):
+                plot_manager.add_plot(i, "")
+            return
+
+            can_recorder = can_bus.Recorder(bus=bus)
+            can_recorder.start()
+        else:
+            return
+            can_recorder.stop()
+
+    except Exception as e:
+        layout.popup_error(name=type(e).__name__, info=e)
 
 
 def clear_button_callback(sender, app_data, user_data) -> None:
-    raise NotImplementedError
+    plot_manager.clear_all()
 
 
 def plot_scale_slider_callback(sender, app_data, user_data) -> None:
@@ -28,7 +47,6 @@ def plot_scale_slider_callback(sender, app_data, user_data) -> None:
 
 
 def plot_height_input_callback(sender, app_data, user_data) -> None:
-    global plot_manager
     for plot in plot_manager.plots.values():
         for i in dpg.get_item_children(plot):
             dpg.set_item_height(i, layout.get_settings_user_plot_height())
@@ -71,11 +89,6 @@ dpg.set_viewport_resize_callback(layout.resize)
 # dpg.set_viewport_max_width(750)
 dpg.setup_dearpygui()
 layout.resize()
-
-plot_manager = plotting.PlotManager()
-for i in range(100, 126):
-    plot_manager.add_plot(i, "")
-
 
 dpg.show_viewport()
 dpg.set_primary_window(app_main, True)

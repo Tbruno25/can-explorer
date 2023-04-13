@@ -47,7 +47,7 @@ class RowItem:
 
 class PlotManager:
     height = DEFAULT_PLOT_HEIGHT
-    plots: Dict[int, RowItem] = {}
+    _plots: Dict[int, RowItem] = {}
 
     def _make_label(self, can_id: int) -> int:
         return dpg.add_button(
@@ -87,4 +87,12 @@ class PlotManager:
         with self._make_row() as row_item:
             row_item.label = self._make_label(can_id)
             row_item.plot = self._make_plot(payload)
-        self.plots[can_id] = row_item
+        self._plots[can_id] = row_item
+
+    def remove_plot(self, can_id: int) -> None:
+        row_item = self._plots.pop(can_id)
+        dpg.delete_item(row_item.table.table_id)
+
+    def clear_all(self) -> None:
+        while self._plots:
+            self.remove_plot(list(self._plots).pop())
