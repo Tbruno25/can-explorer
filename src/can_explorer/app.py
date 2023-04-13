@@ -40,7 +40,7 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
             bitrate=layout.get_settings_user_baudrate(),
         )
     except Exception as e:
-        layout.popup_box("ERROR", e)
+        layout.popup_error(name=type(e).__name__, info=e)
 
 
 dpg.create_context()
