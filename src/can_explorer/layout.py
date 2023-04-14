@@ -66,17 +66,17 @@ class PlotTable(PercentageWidthTableRow):
         super().__init__(parent=Tag.TAB_VIEWER, **kwargs)
 
     def _determine_width(self, uuid) -> int:
-        if uuid.startswith(Tag.PLOT_LABEL):
+        if uuid.startswith("Tag.PLOT_LABEL"):
             return self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith(Tag.PLOT_DATA):
+        elif uuid.startswith("Tag.PLOT_DATA"):
             return self.COLUMN_2_PERCENTAGE
         else:
             raise Exception("TODO")
 
     def add_widget(self, uuid):
-        if uuid.startswith(Tag.PLOT_LABEL):
+        if uuid.startswith("Tag.PLOT_LABEL"):
             percentage = self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith(Tag.PLOT_DATA):
+        elif uuid.startswith("Tag.PLOT_DATA"):
             percentage = self.COLUMN_2_PERCENTAGE
 
         return super().add_widget(uuid, percentage)
