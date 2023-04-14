@@ -12,8 +12,8 @@ class StoppableThread(threading.Thread):
                 ...
     """
 
-    def __init__(self, daemon=True):
-        super().__init__()
+    def __init__(self, daemon=True, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.daemon = daemon
         self.cancel = threading.Event()
 

@@ -3,7 +3,7 @@ import enum
 import can
 import dearpygui.dearpygui as dpg
 
-from can_explorer import can_bus, layout, plotting
+from can_explorer import can_bus, layout, plotting, threads
 
 bus = None
 can_recorder = None
@@ -13,6 +13,23 @@ plot_manager = plotting.PlotManager()
 class State(enum.Flag):
     START = True
     STOP = False
+
+
+class AutoPlotter(threads.StoppableThread):
+    def __init__(
+        self, data: can_bus.CANData, manager: plotting.PlotManager, rate: float = 0.05
+    ):
+        super().__init__()
+        self.data = data
+        self.manager = manager
+        self.rate = rate
+
+    def run(self) -> None:
+        while not self.cancel.wait(self.rate):
+            for can_id, payload in self.data:
+                if can_id in self.manager.plots:
+                    break
+                self.manager.add_plot(can_id, payload)
 
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
