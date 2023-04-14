@@ -3,7 +3,7 @@ from typing import Final
 
 from can import bus, interfaces, listener, notifier
 
-INTERFACES: Final = list(interfaces.VALID_INTERFACES)
+INTERFACES: Final = sorted(list(interfaces.VALID_INTERFACES))
 
 _BAUDRATES = [33_333, 125_000, 250_000, 500_000, 1_000_000]
 BAUDRATES: Final = [format(i, "_d") for i in _BAUDRATES]

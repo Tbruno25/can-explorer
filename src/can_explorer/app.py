@@ -1,13 +1,22 @@
 import enum
+import math
 
 import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting, threads
 
+# creating data
+payload = []
+for i in range(0, 500):
+    payload.append(0.5 + 0.5 * math.sin(50 * i / 1000))
+
+data = {i: payload for i in range(10)}
+
 bus = None
 can_recorder = None
 plot_manager = plotting.PlotManager()
+plot_worker = None
 
 
 class State(enum.Flag):
@@ -26,7 +35,7 @@ class AutoPlotter(threads.StoppableThread):
 
     def run(self) -> None:
         while not self.cancel.wait(self.rate):
-            for can_id, payload in self.data:
+            for can_id, payload in self.data.items():
                 if can_id in self.manager.plots:
                     break
                 self.manager.add_plot(can_id, payload)
@@ -34,6 +43,7 @@ class AutoPlotter(threads.StoppableThread):
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
     global can_recorder
+    global plot_worker
 
     state = State(user_data)
     is_active = not state
@@ -41,15 +51,13 @@ def start_stop_button_callback(sender, app_data, user_data) -> None:
 
     try:
         if is_active:
-            for i in range(100, 126):
-                plot_manager.add_plot(i, "")
-            return
-
-            can_recorder = can_bus.Recorder(bus=bus)
-            can_recorder.start()
+            # can_recorder = can_bus.Recorder(bus)
+            # can_recorder.start()
+            plot_worker = AutoPlotter(data, plot_manager)
+            plot_worker.start()
         else:
-            return
-            can_recorder.stop()
+            # can_recorder.stop()
+            plot_worker.stop()
 
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
@@ -70,12 +78,14 @@ def plot_height_input_callback(sender, app_data, user_data) -> None:
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
     global bus
 
+    user_settings = dict(
+        interface=layout.get_settings_user_interface(),
+        channel=layout.get_settings_user_channel(),
+        bitrate=layout.get_settings_user_baudrate(),
+    )
+
     try:
-        bus = can.Bus(  # type: ignore [abstract]
-            interface=layout.get_settings_user_interface(),
-            channel=layout.get_settings_user_channel(),
-            bitrate=layout.get_settings_user_baudrate(),
-        )
+        bus = can.Bus(**{k: v for k, v in user_settings.items() if v})
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 

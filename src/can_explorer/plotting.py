@@ -1,4 +1,3 @@
-import math
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Dict, Generator, Iterable, Optional
@@ -6,13 +5,6 @@ from typing import Dict, Generator, Iterable, Optional
 import dearpygui.dearpygui as dpg
 
 from can_explorer.layout import DEFAULT_PLOT_HEIGHT, PlotTable, Tag
-
-# creating data
-sindatax = []
-sindatay = []
-for i in range(0, 500):
-    sindatax.append(i / 1000)
-    sindatay.append(0.5 + 0.5 * math.sin(50 * i / 1000))
 
 
 class Config:
@@ -67,8 +59,7 @@ class PlotManager:
             with dpg.plot_axis(
                 **Config.Y_AXIS,
             ):
-                # series belong to a y axis
-                dpg.add_line_series(sindatax, sindatay)
+                dpg.add_line_series(list(range(len(payloads))), payloads)
 
         return PlotData(plot)
 
