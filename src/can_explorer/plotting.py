@@ -5,7 +5,9 @@ from typing import Dict, Generator, Iterable, Optional
 
 import dearpygui.dearpygui as dpg
 
+from can_explorer.can_bus import CANData
 from can_explorer.layout import DEFAULT_PLOT_HEIGHT, PlotTable, Tag
+from can_explorer.threads import StoppableThread
 
 # creating data
 sindatax = []
@@ -93,6 +95,15 @@ class PlotManager:
         row_item = self._plots.pop(can_id)
         dpg.delete_item(row_item.table.table_id)
 
+    def set_height(self, height: int) -> None:
+        self.height = height
+        for row_item in self._plots.values():
+            dpg.set_item_height(row_item.label, self.height)
+            dpg.set_item_height(row_item.plot, self.height)
+
     def clear_all(self) -> None:
         while self._plots:
             self.remove_plot(list(self._plots).pop())
+
+    def make_worker_thread(self, can_data: CANData) -> StoppableThread:
+        ...

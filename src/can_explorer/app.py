@@ -47,16 +47,14 @@ def plot_scale_slider_callback(sender, app_data, user_data) -> None:
 
 
 def plot_height_input_callback(sender, app_data, user_data) -> None:
-    for plot in plot_manager.plots.values():
-        for i in dpg.get_item_children(plot):
-            dpg.set_item_height(i, layout.get_settings_user_plot_height())
+    plot_manager.set_height(layout.get_settings_user_plot_height())
 
 
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
     global bus
 
     try:
-        bus = can.Bus(
+        bus = can.Bus(  # type: ignore [abstract]
             interface=layout.get_settings_user_interface(),
             channel=layout.get_settings_user_channel(),
             bitrate=layout.get_settings_user_baudrate(),
