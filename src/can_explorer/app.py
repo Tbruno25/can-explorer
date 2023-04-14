@@ -1,10 +1,12 @@
 import enum
 import math
+import threading
+from typing import Optional
 
 import can
 import dearpygui.dearpygui as dpg
 
-from can_explorer import can_bus, layout, plotting, threads
+from can_explorer import can_bus, layout, plotting
 
 # creating data
 payload = []
@@ -13,58 +15,76 @@ for i in range(0, 500):
 
 data = {i: payload for i in range(10)}
 
-bus = None
-can_recorder = None
-plot_manager = plotting.PlotManager()
-plot_worker = None
 
-
-class State(enum.Flag):
+class MainButtonState(enum.Flag):
     START = True
     STOP = False
 
 
-class AutoPlotter(threads.StoppableThread):
-    def __init__(
-        self, data: can_bus.CANData, manager: plotting.PlotManager, rate: float = 0.05
-    ):
-        super().__init__()
-        self.data = data
-        self.manager = manager
-        self.rate = rate
+class MainApp:
+    _rate = 0.5
+    _cancel = threading.Event()
+    _worker: Optional[threading.Thread] = None
+    _state: Optional[MainButtonState] = None
 
-    def run(self) -> None:
-        while not self.cancel.wait(self.rate):
-            for can_id, payload in self.data.items():
-                if can_id in self.manager.plots:
-                    break
-                self.manager.add_plot(can_id, payload)
+    bus: Optional[can.bus.BusABC] = None
+    can_recorder = can_bus.Recorder()
+    plot_manager = plotting.PlotManager()
+
+    @property
+    def is_active(self) -> bool:
+        return bool(self._active)
+
+    def set_state(self, state: MainButtonState) -> None:
+        self._active = not state
+
+        if self.is_active:
+            self.start()
+        else:
+            self.stop()
+
+    def _get_plot_worker(self) -> threading.Thread:
+        def worker():
+            while not self._cancel.wait(self._rate):
+                for can_id, payload in self.can_recorder.data.items():
+                    if can_id in self.plot_manager.plots:
+                        break
+                    self.plot_manager.add_plot(can_id, payload)
+
+            self._cancel.clear()
+
+        return threading.Thread(target=worker, daemon=True)
+
+    def start(self):
+        if self.bus is None:
+            raise Exception("ERROR: bus not set")
+
+        self.can_recorder.bus = self.bus
+        self.can_recorder.start()
+
+        self._worker = self._get_plot_worker()
+        self._worker.start()
+
+    def stop(self):
+        self._cancel.set()
+        self._worker.join()
+
+
+app = MainApp()
 
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
-    global can_recorder
-    global plot_worker
-
-    state = State(user_data)
-    is_active = not state
-    dpg.configure_item(sender, label=state.name.capitalize(), user_data=is_active)  # type: ignore[union-attr]
-
+    state = MainButtonState(user_data)
     try:
-        if is_active:
-            # can_recorder = can_bus.Recorder(bus)
-            # can_recorder.start()
-            plot_worker = AutoPlotter(data, plot_manager)
-            plot_worker.start()
-        else:
-            # can_recorder.stop()
-            plot_worker.stop()
+        app.set_state(state)
+        dpg.configure_item(sender, label=state.name.capitalize(), user_data=app.is_active)  # type: ignore[union-attr]
 
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 
 
 def clear_button_callback(sender, app_data, user_data) -> None:
-    plot_manager.clear_all()
+    app.plot_manager.clear_all()
 
 
 def plot_scale_slider_callback(sender, app_data, user_data) -> None:
@@ -72,12 +92,10 @@ def plot_scale_slider_callback(sender, app_data, user_data) -> None:
 
 
 def plot_height_input_callback(sender, app_data, user_data) -> None:
-    plot_manager.set_height(layout.get_settings_user_plot_height())
+    app.plot_manager.set_height(layout.get_settings_user_plot_height())
 
 
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
-    global bus
-
     user_settings = dict(
         interface=layout.get_settings_user_interface(),
         channel=layout.get_settings_user_channel(),
@@ -85,7 +103,8 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
     )
 
     try:
-        bus = can.Bus(**{k: v for k, v in user_settings.items() if v})
+        app.bus = can.Bus(**{k: v for k, v in user_settings.items() if v})
+
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 
