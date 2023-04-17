@@ -17,9 +17,13 @@ class Config:
         no_box_select=True,
     )
 
-    X_AXIS = dict(axis=dpg.mvXAxis, lock_min=True, lock_max=True, no_tick_labels=True)
+    X_AXIS = dict(
+        axis=dpg.mvXAxis
+    )  # , lock_min=True, lock_max=True, no_tick_labels=True)
 
-    Y_AXIS = dict(axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True)
+    Y_AXIS = dict(
+        axis=dpg.mvYAxis
+    )  # , lock_min=True, lock_max=True, no_tick_labels=True)
 
 
 class PlotItem(str):
@@ -41,6 +45,10 @@ class PlotManager:
     height = DEFAULT_PLOT_HEIGHT
     plots: Dict[int, RowItem] = {}
 
+    @staticmethod
+    def _handle_payloads(payloads: Iterable) -> dict:
+        return dict(x=tuple(range(len(payloads))), y=tuple(payloads))
+
     def _make_label(self, can_id: int) -> int:
         return dpg.add_button(
             tag=f"{Tag.PLOT_LABEL}{dpg.generate_uuid()}",
@@ -59,7 +67,7 @@ class PlotManager:
             with dpg.plot_axis(
                 **Config.Y_AXIS,
             ):
-                data = dpg.add_line_series(list(range(len(payloads))), payloads)
+                data = dpg.add_line_series(**self._handle_payloads(payloads))
 
         return PlotItem(plot, data)
 
@@ -75,8 +83,8 @@ class PlotManager:
             row.table.submit()
 
     def update_plot(self, can_id: int, payloads: Iterable) -> None:
-        dpg.set_value(
-            self.plots[can_id].plot.data, [list(range(len(payloads))), payloads]
+        dpg.configure_item(
+            self.plots[can_id].plot.data, **self._handle_payloads(payloads)
         )
 
     def add_plot(self, can_id: int, payload: Iterable) -> None:

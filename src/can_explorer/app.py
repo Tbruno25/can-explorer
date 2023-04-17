@@ -1,5 +1,4 @@
 import enum
-import math
 import threading
 from typing import Optional
 
@@ -7,14 +6,6 @@ import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
-
-# creating data
-payload = []
-for i in range(0, 500):
-    payload.append(0.5 + 0.5 * math.sin(50 * i / 1000))
-
-i = 1
-data = {i: payload}
 
 
 class MainButtonState(enum.Flag):
@@ -46,16 +37,12 @@ class MainApp:
 
     def _get_plot_worker(self) -> threading.Thread:
         def worker():
-            global i, payload
-            self._rate = 1
             while not self._cancel.wait(self._rate):
-                i += 1
-                data[i] = payload
-                for can_id, payload in data.items():
+                for can_id, payloads in self.can_recorder.data.items():
                     if can_id not in self.plot_manager.plots:
-                        self.plot_manager.add_plot(can_id, payload)
+                        self.plot_manager.add_plot(can_id, payloads)
                     else:
-                        self.plot_manager.update_plot(can_id, payload)
+                        self.plot_manager.update_plot(can_id, payloads)
 
             self._cancel.clear()
 
