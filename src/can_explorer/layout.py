@@ -24,7 +24,7 @@ class Tag(str, Enum):
     MAIN_BUTTON = auto()
     CLEAR_BUTTON = auto()
     PLOT_LABEL = auto()
-    PLOT_DATA = auto()
+    PLOT_ITEM = auto()
     TAB_VIEWER = auto()
     TAB_SETTINGS = auto()
     SETTINGS_INTERFACE = auto()
@@ -68,7 +68,7 @@ class PlotTable(PercentageWidthTableRow):
     def _determine_width(self, uuid) -> int:
         if uuid.startswith("Tag.PLOT_LABEL"):
             return self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith("Tag.PLOT_DATA"):
+        elif uuid.startswith("Tag.PLOT_ITEM"):
             return self.COLUMN_2_PERCENTAGE
         else:
             raise Exception("TODO")
@@ -76,7 +76,7 @@ class PlotTable(PercentageWidthTableRow):
     def add_widget(self, uuid):
         if uuid.startswith("Tag.PLOT_LABEL"):
             percentage = self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith("Tag.PLOT_DATA"):
+        elif uuid.startswith("Tag.PLOT_ITEM"):
             percentage = self.COLUMN_2_PERCENTAGE
 
         return super().add_widget(uuid, percentage)
@@ -157,7 +157,9 @@ def _viewer_tab() -> None:
 
 def _settings_tab() -> None:
     with dpg.collapsing_header(label="CAN Bus", default_open=True):
-        dpg.add_combo(tag=Tag.SETTINGS_INTERFACE, label="Interface")
+        dpg.add_combo(
+            tag=Tag.SETTINGS_INTERFACE, label="Interface", default_value="socketcan"
+        )
         dpg.add_input_text(tag=Tag.SETTINGS_CHANNEL, label="Channel")
         dpg.add_combo(tag=Tag.SETTINGS_BAUDRATE, label="Baudrate")
         dpg.add_spacer(height=5)

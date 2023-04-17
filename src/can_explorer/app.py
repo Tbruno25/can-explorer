@@ -13,7 +13,8 @@ payload = []
 for i in range(0, 500):
     payload.append(0.5 + 0.5 * math.sin(50 * i / 1000))
 
-data = {i: payload for i in range(10)}
+i = 1
+data = {i: payload}
 
 
 class MainButtonState(enum.Flag):
@@ -45,11 +46,16 @@ class MainApp:
 
     def _get_plot_worker(self) -> threading.Thread:
         def worker():
+            global i, payload
+            self._rate = 1
             while not self._cancel.wait(self._rate):
-                for can_id, payload in self.can_recorder.data.items():
-                    if can_id in self.plot_manager.plots:
-                        break
-                    self.plot_manager.add_plot(can_id, payload)
+                i += 1
+                data[i] = payload
+                for can_id, payload in data.items():
+                    if can_id not in self.plot_manager.plots:
+                        self.plot_manager.add_plot(can_id, payload)
+                    else:
+                        self.plot_manager.update_plot(can_id, payload)
 
             self._cancel.clear()
 

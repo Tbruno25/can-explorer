@@ -22,19 +22,17 @@ class Config:
     Y_AXIS = dict(axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True)
 
 
-class PlotLabel(int):
-    ...
-
-
-class PlotData(str):
-    ...
+@dataclass
+class PlotItem:
+    parent: str
+    data: str
 
 
 @dataclass
 class RowItem:
     table: PlotTable
-    label: Optional[PlotLabel] = None
-    plot: Optional[PlotData] = None
+    label: Optional[str] = None
+    plot: Optional[PlotItem] = None
 
 
 class PlotManager:
@@ -49,9 +47,9 @@ class PlotManager:
             enabled=False,
         )
 
-    def _make_plot(self, payloads: Iterable) -> PlotData:
+    def _make_plot(self, payloads: Iterable) -> PlotItem:
         with dpg.plot(
-            tag=f"{Tag.PLOT_DATA}{dpg.generate_uuid()}",
+            tag=f"{Tag.PLOT_ITEM}{dpg.generate_uuid()}",
             height=self.height,
             **Config.PLOT,
         ) as plot:
@@ -59,9 +57,9 @@ class PlotManager:
             with dpg.plot_axis(
                 **Config.Y_AXIS,
             ):
-                dpg.add_line_series(list(range(len(payloads))), payloads)
+                data = dpg.add_line_series(list(range(len(payloads))), payloads)
 
-        return PlotData(plot)
+        return PlotItem(plot, data)
 
     @staticmethod
     @contextmanager
@@ -71,8 +69,13 @@ class PlotManager:
             yield row
         finally:
             row.table.add_widget(row.label)
-            row.table.add_widget(row.plot)
+            row.table.add_widget(row.plot.parent)
             row.table.submit()
+
+    def update_plot(self, can_id: int, payloads: Iterable) -> None:
+        dpg.set_value(
+            self.plots[can_id].plot.data, [list(range(len(payloads))), payloads]
+        )
 
     def add_plot(self, can_id: int, payload: Iterable) -> None:
         with self._make_row() as row_item:
@@ -88,7 +91,7 @@ class PlotManager:
         self.height = height
         for row_item in self.plots.values():
             dpg.set_item_height(row_item.label, self.height)
-            dpg.set_item_height(row_item.plot, self.height)
+            dpg.set_item_height(row_item.plot.parent, self.height)
 
     def clear_all(self) -> None:
         while self.plots:
