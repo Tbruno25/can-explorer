@@ -22,10 +22,12 @@ class Config:
     Y_AXIS = dict(axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True)
 
 
-@dataclass
-class PlotItem:
-    parent: str
-    data: str
+class PlotItem(str):
+    def __new__(cls, plot: str, data: str):
+        instance = super().__new__(cls, plot)
+        instance.data = data
+
+        return instance
 
 
 @dataclass
@@ -69,7 +71,7 @@ class PlotManager:
             yield row
         finally:
             row.table.add_widget(row.label)
-            row.table.add_widget(row.plot.parent)
+            row.table.add_widget(row.plot)
             row.table.submit()
 
     def update_plot(self, can_id: int, payloads: Iterable) -> None:
@@ -91,7 +93,7 @@ class PlotManager:
         self.height = height
         for row_item in self.plots.values():
             dpg.set_item_height(row_item.label, self.height)
-            dpg.set_item_height(row_item.plot.parent, self.height)
+            dpg.set_item_height(row_item.plot, self.height)
 
     def clear_all(self) -> None:
         while self.plots:
