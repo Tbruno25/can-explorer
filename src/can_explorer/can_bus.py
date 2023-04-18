@@ -27,10 +27,10 @@ class _Listener(Listener):
 
 
 class _PayloadBuffer(deque):
-    maxlen = 2500
+    maxlen = 25
 
-    def __init__(self, length: int = 200):
-        super().__init__([0] * length)
+    def __init__(self):
+        super().__init__([0] * self.maxlen)
 
 
 class Recorder:

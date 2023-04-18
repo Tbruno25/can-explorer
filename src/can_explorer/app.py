@@ -42,8 +42,8 @@ class MainApp:
                     if can_id not in self.plot_manager.plots:
                         self.plot_manager.add_plot(can_id, payloads)
                     else:
-                        self.plot_manager.update_plot(can_id, payloads)
-
+                        pass
+                        # self.plot_manager.plots[can_id].plot.update()
             self._cancel.clear()
 
         return threading.Thread(target=worker, daemon=True)

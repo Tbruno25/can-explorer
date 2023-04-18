@@ -74,12 +74,15 @@ class PlotTable(PercentageWidthTableRow):
             raise Exception("TODO")
 
     def add_widget(self, uuid):
-        if uuid.startswith("Tag.PLOT_LABEL"):
-            percentage = self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith("Tag.PLOT_ITEM"):
-            percentage = self.COLUMN_2_PERCENTAGE
+        try:
+            if uuid.startswith("Tag.PLOT_LABEL"):
+                percentage = self.COLUMN_1_PERCENTAGE
+            elif uuid.startswith("Tag.PLOT_ITEM"):
+                percentage = self.COLUMN_2_PERCENTAGE
 
-        return super().add_widget(uuid, percentage)
+            return super().add_widget(uuid, percentage)
+        except Exception as e:
+            print(e)
 
 
 def _init_fonts():
