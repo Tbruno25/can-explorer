@@ -18,37 +18,42 @@ class Config:
         height=DEFAULT_PLOT_HEIGHT,
     )
 
-    X_AXIS = dict(
-        axis=dpg.mvXAxis
-    )  # , lock_min=True, lock_max=True, no_tick_labels=True)
+    X_AXIS = dict(axis=dpg.mvXAxis, lock_min=True, lock_max=True, no_tick_labels=True)
 
-    Y_AXIS = dict(
-        axis=dpg.mvYAxis
-    )  # , lock_min=True, lock_max=True, no_tick_labels=True)
+    Y_AXIS = dict(axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True)
 
 
-def _parse_payloads(payloads: Iterable) -> dict:
-    return dict(x=tuple(range(len(payloads))), y=tuple(payloads))
+class AxisData(dict):
+    x: tuple
+    y: tuple
+
+    def __init__(self, payloads: Iterable):
+        x = tuple(range(len(payloads)))
+        y = tuple(payloads)
+        super().__init__(dict(x=x, y=y))
 
 
 class Plot(str):
     x_axis: str
     y_axis: str
+    series: str
 
-    def __new__(cls, x: Iterable, y: Iterable) -> None:
+    def __new__(cls, payloads: Iterable) -> None:
         with dpg.plot(
             tag=f"{Tag.PLOT_ITEM}{dpg.generate_uuid()}", **Config.PLOT
         ) as plot:
             plot = super().__new__(cls, plot)
             plot.x_axis = dpg.add_plot_axis(**Config.X_AXIS)
             plot.y_axis = dpg.add_plot_axis(**Config.Y_AXIS)
-            dpg.add_line_series(parent=plot.y_axis, x=x, y=y)
+            plot.series = dpg.add_line_series(parent=plot.y_axis, **AxisData(payloads))
 
         return plot
 
-    def update(self, x: Iterable, y: Iterable) -> None:
-        dpg.configure_item(self.y_axis, x=x, y=y)
-        dpg.fit_axis_data(self.y_axis)
+    def update(self, payloads: Iterable) -> None:
+        axis_data = AxisData(payloads)
+        dpg.set_axis_limits(self.x_axis, min(axis_data["x"]), max(axis_data["x"]))
+        dpg.set_axis_limits(self.y_axis, min(axis_data["y"]), max(axis_data["y"]))
+        dpg.configure_item(self.series, **axis_data)
 
 
 class Label(str):
@@ -67,13 +72,12 @@ class Row:
     plot: Plot
 
     def __init__(self, can_id: int, payloads: Iterable) -> None:
-        self._table = PlotTable()
+        self.table = PlotTable()
         self.label = Label(can_id)
-        self.plot = Plot(**_parse_payloads(payloads))
-
-        self._table.add_widget(self.label)
-        self._table.add_widget(self.plot)
-        self._table.submit()
+        self.plot = Plot(payloads)
+        self.table.add_widget(self.label)
+        self.table.add_widget(self.plot)
+        self.table.submit()
 
     def set_height(self, height: int) -> None:
         dpg.set_item_height(self.label, height)
@@ -84,20 +88,29 @@ class Row:
 
 
 class PlotManager:
-    height = DEFAULT_PLOT_HEIGHT
-    plots: Dict[int, Row] = {}
+    row: Dict[int, Row] = {}
 
-    @staticmethod
-    def _handle_payloads(payloads: Iterable) -> dict:
-        return dict(x=tuple(range(len(payloads))), y=tuple(payloads))
+    def __call__(self) -> dict:
+        return self.row
 
-    def add_plot(self, can_id: int, payloads: Iterable) -> None:
+    def add(self, can_id: int, payloads: Iterable) -> None:
+        if can_id in self.row:
+            raise Exception(f"Error: id {can_id} already exists")
+
         row = Row(can_id, payloads)
-        self.plots[can_id] = row
+        self.row[can_id] = row
 
-    def remove_plot(self, can_id: int) -> None:
-        self.plots.pop(can_id)
+    def delete(self, can_id: int) -> None:
+        self.row[can_id].delete()
+        self.row.pop(can_id)
+
+    def update(self, can_id: int, payloads: Iterable) -> None:
+        return self.row[can_id].plot.update(payloads)
 
     def clear_all(self) -> None:
-        while self.plots:
-            self.remove_plot(list(self.plots).pop())
+        while self.row:
+            self.delete(list(self.row).pop())
+
+    def set_height(self, height: int) -> None:
+        for row in self.row.values():
+            row.set_height(height)

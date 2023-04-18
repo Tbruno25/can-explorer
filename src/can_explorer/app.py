@@ -14,7 +14,7 @@ class MainButtonState(enum.Flag):
 
 
 class MainApp:
-    _rate = 0.5
+    _rate = 0.05
     _cancel = threading.Event()
     _worker: Optional[threading.Thread] = None
     _state: Optional[MainButtonState] = None
@@ -39,11 +39,10 @@ class MainApp:
         def worker():
             while not self._cancel.wait(self._rate):
                 for can_id, payloads in self.can_recorder.data.items():
-                    if can_id not in self.plot_manager.plots:
-                        self.plot_manager.add_plot(can_id, payloads)
+                    if can_id not in self.plot_manager():
+                        self.plot_manager.add(can_id, payloads)
                     else:
-                        pass
-                        # self.plot_manager.plots[can_id].plot.update()
+                        self.plot_manager.update(can_id, payloads)
             self._cancel.clear()
 
         return threading.Thread(target=worker, daemon=True)
