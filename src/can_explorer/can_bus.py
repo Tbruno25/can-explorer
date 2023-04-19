@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from itertools import islice
 from typing import Final, Optional
 
 from can.bus import BusABC
@@ -32,6 +33,12 @@ class PayloadBuffer(deque):
 
     def __init__(self):
         super().__init__([0] * self.MAX, maxlen=self.MAX)
+
+    def __getitem__(self, index) -> tuple:
+        # Add ability to utilize slicing
+        # Note: islice does not support a negative index
+        if isinstance(index, slice):
+            return tuple(islice(self, index.start, index.stop, index.step))
 
 
 class Recorder:

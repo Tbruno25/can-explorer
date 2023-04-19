@@ -2,6 +2,7 @@ from typing import Dict, Iterable, Optional
 
 import dearpygui.dearpygui as dpg
 
+from can_explorer.can_bus import PayloadBuffer
 from can_explorer.layout import DEFAULT_PLOT_HEIGHT, PlotTable, Tag
 
 
@@ -58,18 +59,21 @@ class Row:
     table: PlotTable
     label: Label
     plot: Plot
+    height: int
 
-    def __init__(self, can_id: int, x: Iterable, y: Iterable) -> None:
+    def __init__(self, can_id: int, height: int, x: Iterable, y: Iterable) -> None:
         self.table = PlotTable()
         self.label = Label(can_id)
         self.plot = Plot(x, y)
         self.table.add_widget(self.label)
         self.table.add_widget(self.plot)
         self.table.submit()
+        self.set_height(height)
 
     def set_height(self, height: int) -> None:
         dpg.set_item_height(self.label, height)
         dpg.set_item_height(self.plot, height)
+        self.height = height
 
     def delete(self) -> None:
         dpg.delete_item(self.table.table_id)
@@ -79,7 +83,7 @@ class AxisData(dict):
     x: tuple
     y: tuple
 
-    def __init__(self, payloads: Iterable):
+    def __init__(self, payloads: Iterable, limit: Optional[int] = None):
         x = tuple(range(len(payloads)))
         y = tuple(payloads)
         super().__init__(dict(x=x, y=y))
@@ -87,26 +91,33 @@ class AxisData(dict):
 
 class PlotManager:
     row: Dict[int, Row] = {}
-    _x_limit = 250
     _height = DEFAULT_PLOT_HEIGHT
+    _x_limit = 100
 
     def __call__(self) -> dict:
         return self.row
 
-    def add(self, can_id: int, payloads: Iterable) -> None:
+    def _slice(self, payloads: PayloadBuffer) -> PayloadBuffer:
+        return payloads[len(payloads) - self._x_limit :]
+
+    def add(self, can_id: int, payloads: PayloadBuffer) -> None:
         if can_id in self.row:
             raise Exception(f"Error: id {can_id} already exists")
 
-        row = Row(can_id, **AxisData(payloads))
-        row.set_height(self._height)
+        row = Row(can_id, self._height, **AxisData(self._slice(payloads)))
         self.row[can_id] = row
 
     def delete(self, can_id: int) -> None:
         self.row[can_id].delete()
         self.row.pop(can_id)
 
-    def update(self, can_id: int, payloads: Optional[Iterable]) -> None:
-        return self.row[can_id].plot.update(payloads)
+    def update(self, can_id: int, payloads: PayloadBuffer) -> None:
+        row = self.row[can_id]
+
+        if row.height != self._height:
+            row.set_height(self._height)
+
+        row.plot.update(**AxisData(self._slice(payloads)))
 
     def clear_all(self) -> None:
         while self.row:
@@ -115,5 +126,5 @@ class PlotManager:
     def set_height(self, height: int) -> None:
         self._height = height
 
-        for row in self.row.values():
-            row.set_height(self._height)
+    def set_limit(self, x_limit: int) -> None:
+        self._x_limit = x_limit
