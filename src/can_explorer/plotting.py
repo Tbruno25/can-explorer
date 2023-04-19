@@ -3,7 +3,7 @@ from typing import Dict, Iterable, Optional
 import dearpygui.dearpygui as dpg
 
 from can_explorer.can_bus import PayloadBuffer
-from can_explorer.layout import Default, PlotTable, Tag
+from can_explorer.layout import Default, Font, PlotTable, Tag
 
 
 class Config:
@@ -52,6 +52,7 @@ class Label(str):
             label=hex(can_id),
             **Config.LABEL,
         )
+        dpg.bind_item_font(label, Font.LABEL)
 
         return super().__new__(cls, label)
 

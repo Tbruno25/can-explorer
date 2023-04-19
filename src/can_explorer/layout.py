@@ -18,6 +18,11 @@ class Default:
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
 
 
+class Font:
+    DEFAULT: str
+    LABEL: str
+
+
 @unique
 class Tag(str, Enum):
     HEADER = auto()
@@ -92,9 +97,12 @@ def _percentage(n: float, maximum: float) -> int:
 
 
 def _init_fonts():
+    global Font
     with dpg.font_registry():
-        default = dpg.add_font(Default.FONT, Default.FONT_HEIGHT)
-        dpg.bind_font(default)
+        Font.DEFAULT = dpg.add_font(Default.FONT, Default.FONT_HEIGHT)
+        Font.LABEL = dpg.add_font(Default.FONT, Default.FONT_HEIGHT * 1.75)
+
+    dpg.bind_font(Font.DEFAULT)
 
 
 def _init_themes():
