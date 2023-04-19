@@ -6,6 +6,7 @@ import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
+from can_explorer.can_bus import PayloadBuffer
 
 
 class MainButtonState(enum.Flag):
@@ -35,14 +36,24 @@ class MainApp:
         else:
             self.stop()
 
+    def repopulate(self) -> None:
+        """
+        Repopulate plots in ascending order.
+        """
+        self.plot_manager.clear_all()
+        for can_id in sorted(self.can_recorder.data):
+            payload_buffer = self.can_recorder.data[can_id]
+            self.plot_manager.add(can_id, payload_buffer)
+
     def _get_plot_worker(self) -> threading.Thread:
         def worker():
             while not self._cancel.wait(self._rate):
-                for can_id, payloads in self.can_recorder.data.items():
+                for can_id, payload_buffer in self.can_recorder.data.items():
                     if can_id not in self.plot_manager():
-                        self.plot_manager.add(can_id, payloads)
+                        self.repopulate()
+                        break
                     else:
-                        self.plot_manager.update(can_id, payloads)
+                        self.plot_manager.update(can_id, payload_buffer)
             self._cancel.clear()
 
         return threading.Thread(target=worker, daemon=True)
@@ -62,9 +73,12 @@ class MainApp:
         self._worker.join()
 
     def set_plot_limit(self, x_limit: int) -> None:
-        # if not PayloadBuffer.MIN <= x_limit <= PayloadBuffer.MAX:
-        #     raise Exception(f"Error: value must be between {PayloadBuffer.MIN} - {PayloadBuffer.MAX}")
-        ...
+        if not PayloadBuffer.MIN <= x_limit <= PayloadBuffer.MAX:
+            raise Exception(
+                f"Error: value must be between {PayloadBuffer.MIN} - {PayloadBuffer.MAX}"
+            )
+
+        self._x_limit = x_limit
 
 
 app = MainApp()
