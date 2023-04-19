@@ -8,8 +8,6 @@ from can_explorer.can_bus import PayloadBuffer
 
 RESOURCES_DIR = Path(__file__).parents[2] / "resources"
 
-font = None
-
 
 class Default:
     WIDTH: Final = 600
@@ -17,6 +15,7 @@ class Default:
     FONT_HEIGHT: Final = 14
     PLOT_HEIGHT: Final = 100
     BUFFER_SIZE: Final = 100
+    FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
 
 
 @unique
@@ -93,13 +92,19 @@ def _percentage(n: float, maximum: float) -> int:
 
 
 def _init_fonts():
-    global font
-
     with dpg.font_registry():
-        default = dpg.add_font(RESOURCES_DIR / "Inter-Medium.ttf", Default.FONT_HEIGHT)
+        default = dpg.add_font(Default.FONT, Default.FONT_HEIGHT)
         dpg.bind_font(default)
 
-    font = default
+
+def _init_themes():
+    default_background = (50, 50, 50, 255)
+    with dpg.theme() as disabled_theme:
+        with dpg.theme_component(dpg.mvButton, enabled_state=False):
+            dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, default_background)
+            dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, default_background)
+
+    dpg.bind_theme(disabled_theme)
 
 
 def _header() -> None:
@@ -210,6 +215,7 @@ def _settings_tab() -> None:
 
 def create() -> None:
     _init_fonts()
+    _init_themes()
     _header()
     _body()
     _footer()

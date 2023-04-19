@@ -52,6 +52,7 @@ class Label(str):
             label=hex(can_id),
             **Config.LABEL,
         )
+
         return super().__new__(cls, label)
 
 
