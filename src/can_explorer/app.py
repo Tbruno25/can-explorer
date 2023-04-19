@@ -6,7 +6,7 @@ import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
-from can_explorer.can_bus import PayloadBuffer
+from can_explorer.layout import Default
 
 
 class MainButtonState(enum.Flag):
@@ -38,15 +38,14 @@ class MainApp:
 
     def repopulate(self) -> None:
         """
-        Repopulate plots in ascending order.
+        Repopulate all plots in ascending order.
         """
         self.plot_manager.clear_all()
-        for can_id in sorted(self.can_recorder.data):
-            payload_buffer = self.can_recorder.data[can_id]
+        for can_id, payload_buffer in sorted(self.can_recorder.data.items()):
             self.plot_manager.add(can_id, payload_buffer)
 
     def _get_plot_worker(self) -> threading.Thread:
-        def worker():
+        def loop():
             while not self._cancel.wait(self._rate):
                 for can_id, payload_buffer in self.can_recorder.data.items():
                     if can_id not in self.plot_manager():
@@ -56,7 +55,7 @@ class MainApp:
                         self.plot_manager.update(can_id, payload_buffer)
             self._cancel.clear()
 
-        return threading.Thread(target=worker, daemon=True)
+        return threading.Thread(target=loop, daemon=True)
 
     def start(self):
         if self.bus is None:
@@ -71,14 +70,6 @@ class MainApp:
     def stop(self):
         self._cancel.set()
         self._worker.join()
-
-    def set_plot_limit(self, x_limit: int) -> None:
-        if not PayloadBuffer.MIN <= x_limit <= PayloadBuffer.MAX:
-            raise Exception(
-                f"Error: value must be between {PayloadBuffer.MIN} - {PayloadBuffer.MAX}"
-            )
-
-        self._x_limit = x_limit
 
 
 app = MainApp()
@@ -98,19 +89,19 @@ def clear_button_callback(sender, app_data, user_data) -> None:
     app.plot_manager.clear_all()
 
 
-def plot_scale_slider_callback(sender, app_data, user_data) -> None:
-    raise NotImplementedError
+def plot_buffer_slider_callback(sender, app_data, user_data) -> None:
+    app.plot_manager.set_limit(layout.get_settings_plot_buffer())
 
 
-def plot_height_input_callback(sender, app_data, user_data) -> None:
-    app.plot_manager.set_height(layout.get_settings_user_plot_height())
+def plot_height_slider_callback(sender, app_data, user_data) -> None:
+    app.plot_manager.set_height(layout.get_settings_plot_height())
 
 
 def settings_apply_button_callback(sender, app_data, user_data) -> None:
     user_settings = dict(
-        interface=layout.get_settings_user_interface(),
-        channel=layout.get_settings_user_channel(),
-        bitrate=layout.get_settings_user_baudrate(),
+        interface=layout.get_settings_interface(),
+        channel=layout.get_settings_channel(),
+        bitrate=layout.get_settings_baudrate(),
     )
 
     try:
@@ -134,11 +125,11 @@ layout.set_settings_apply_button_callback(settings_apply_button_callback)
 layout.set_main_button_callback(start_stop_button_callback)
 layout.set_clear_button_callback(clear_button_callback)
 
-layout.set_plot_scale_slider_callback(plot_scale_slider_callback)
-layout.set_settings_plot_height_callback(plot_height_input_callback)
+layout.set_plot_buffer_slider_callback(plot_buffer_slider_callback)
+layout.set_plot_height_slider_callback(plot_height_slider_callback)
 
 
-dpg.create_viewport(title="CAN Explorer", width=layout.WIDTH, height=layout.HEIGHT)
+dpg.create_viewport(title="CAN Explorer", width=Default.WIDTH, height=Default.HEIGHT)
 dpg.set_viewport_resize_callback(layout.resize)
 # dpg.set_viewport_max_height(645)
 # dpg.set_viewport_max_width(750)

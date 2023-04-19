@@ -4,15 +4,19 @@ from typing import Callable, Final, Iterable, Union
 
 import dearpygui.dearpygui as dpg
 
-WIDTH: Final = 600
-HEIGHT: Final = 600
-
-DEFAULT_FONT_HEIGHT: Final = 14
-DEFAULT_PLOT_HEIGHT: Final = 100
+from can_explorer.can_bus import PayloadBuffer
 
 RESOURCES_DIR = Path(__file__).parents[2] / "resources"
 
 font = None
+
+
+class Default:
+    WIDTH: Final = 600
+    HEIGHT: Final = 600
+    FONT_HEIGHT: Final = 14
+    PLOT_HEIGHT: Final = 100
+    BUFFER_SIZE: Final = 100
 
 
 @unique
@@ -20,19 +24,18 @@ class Tag(str, Enum):
     HEADER = auto()
     BODY = auto()
     FOOTER = auto()
-    PLOT_SCALE_SLIDER = auto()
-    PLOT_HEIGHT_SLIDER = auto()
     MAIN_BUTTON = auto()
     CLEAR_BUTTON = auto()
     PLOT_LABEL = auto()
     PLOT_ITEM = auto()
     TAB_VIEWER = auto()
     TAB_SETTINGS = auto()
+    SETTINGS_PLOT_BUFFER = auto()
+    SETTINGS_PLOT_HEIGHT = auto()
     SETTINGS_INTERFACE = auto()
     SETTINGS_CHANNEL = auto()
     SETTINGS_BAUDRATE = auto()
     SETTINGS_APPLY = auto()
-    SETTINGS_PLOT_HEIGHT = auto()
 
 
 class PercentageWidthTableRow:
@@ -75,11 +78,25 @@ class PlotTable(PercentageWidthTableRow):
         return super().add_widget(uuid, percentage)
 
 
+def _percentage(n: float, maximum: float) -> int:
+    """
+    Calculate a percentage.
+
+    Args:
+        n (float): Current value
+        maximum (float): Total value
+
+    Returns:
+        int: Percentage
+    """
+    return 100 * n // max
+
+
 def _init_fonts():
     global font
 
     with dpg.font_registry():
-        default = dpg.add_font(RESOURCES_DIR / "Inter-Medium.ttf", DEFAULT_FONT_HEIGHT)
+        default = dpg.add_font(RESOURCES_DIR / "Inter-Medium.ttf", Default.FONT_HEIGHT)
         dpg.bind_font(default)
 
     font = default
@@ -115,27 +132,35 @@ def _footer() -> None:
         dpg.add_separator()
         dpg.add_spacer(height=2)
 
-        with dpg.group(horizontal=True):
-            dpg.add_text("Plot Scale %")
-            dpg.add_spacer()
-            dpg.add_slider_int(
-                tag=Tag.PLOT_SCALE_SLIDER,
-                width=-1,
-                default_value=50,
-                format="",
-            )
+        with dpg.table(header_row=False):
+            dpg.add_table_column()
+            dpg.add_table_column()
+            with dpg.table_row():
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Message Buffer Size")
+                    dpg.add_spacer()
+                    dpg.add_slider_int(
+                        tag=Tag.SETTINGS_PLOT_BUFFER,
+                        width=-1,
+                        default_value=Default.BUFFER_SIZE,
+                        min_value=PayloadBuffer.MIN,
+                        max_value=PayloadBuffer.MAX,
+                        clamped=True,
+                        format="%d",
+                    )
 
-        with dpg.group(horizontal=True):
-            dpg.add_text("Plot Height")
-            dpg.add_spacer()
-            dpg.add_slider_int(
-                tag=Tag.PLOT_HEIGHT_SLIDER,
-                width=-1,
-                default_value=DEFAULT_PLOT_HEIGHT,
-                format="",
-                min_value=50,
-                max_value=500,
-            )
+                with dpg.group(horizontal=True):
+                    dpg.add_text("Plot Height")
+                    dpg.add_spacer()
+                    dpg.add_slider_int(
+                        tag=Tag.SETTINGS_PLOT_HEIGHT,
+                        width=-1,
+                        default_value=Default.PLOT_HEIGHT,
+                        min_value=50,
+                        max_value=500,
+                        clamped=True,
+                        format="%dpx",
+                    )
         dpg.add_spacer(height=2)
 
         dpg.add_separator()
@@ -174,16 +199,6 @@ def _settings_tab() -> None:
         dpg.add_spacer(height=5)
 
     with dpg.collapsing_header(label="GUI"):
-        dpg.add_input_int(
-            tag=Tag.SETTINGS_PLOT_HEIGHT,
-            label="Plot Height",
-            default_value=DEFAULT_PLOT_HEIGHT,
-            step=10,
-            min_value=50,
-            max_value=500,
-            min_clamped=True,
-            max_clamped=True,
-        )
         dpg.add_button(
             label="Launch Font Manager", width=-1, callback=dpg.show_font_manager
         )
@@ -241,20 +256,24 @@ def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> Non
     )
 
 
-def get_settings_user_interface() -> str:
+def get_settings_plot_buffer() -> int:
+    return dpg.get_value(Tag.SETTINGS_PLOT_BUFFER)
+
+
+def get_settings_plot_height() -> int:
+    return dpg.get_value(Tag.SETTINGS_PLOT_HEIGHT)
+
+
+def get_settings_interface() -> str:
     return dpg.get_value(Tag.SETTINGS_INTERFACE)
 
 
-def get_settings_user_channel() -> str:
+def get_settings_channel() -> str:
     return dpg.get_value(Tag.SETTINGS_CHANNEL)
 
 
-def get_settings_user_baudrate() -> int:
+def get_settings_baudrate() -> int:
     return dpg.get_value(Tag.SETTINGS_BAUDRATE)
-
-
-def get_settings_user_plot_height() -> int:
-    return dpg.get_value(Tag.SETTINGS_PLOT_HEIGHT)
 
 
 def set_main_button_callback(callback: Callable) -> None:
@@ -265,16 +284,16 @@ def set_clear_button_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.CLEAR_BUTTON, callback=callback)
 
 
-def set_plot_scale_slider_callback(callback: Callable) -> None:
-    dpg.configure_item(Tag.PLOT_SCALE_SLIDER, callback=callback)
+def set_plot_buffer_slider_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_PLOT_BUFFER, callback=callback)
+
+
+def set_plot_height_slider_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_PLOT_HEIGHT, callback=callback)
 
 
 def set_settings_apply_button_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.SETTINGS_APPLY, callback=callback)
-
-
-def set_settings_plot_height_callback(callback: Callable) -> None:
-    dpg.configure_item(Tag.SETTINGS_PLOT_HEIGHT, callback=callback)
 
 
 def set_settings_interface_options(iterable: Iterable[str]) -> None:

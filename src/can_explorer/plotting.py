@@ -3,7 +3,7 @@ from typing import Dict, Iterable, Optional
 import dearpygui.dearpygui as dpg
 
 from can_explorer.can_bus import PayloadBuffer
-from can_explorer.layout import DEFAULT_PLOT_HEIGHT, PlotTable, Tag
+from can_explorer.layout import Default, PlotTable, Tag
 
 
 class Config:
@@ -91,8 +91,8 @@ class AxisData(dict):
 
 class PlotManager:
     row: Dict[int, Row] = {}
-    _height = DEFAULT_PLOT_HEIGHT
-    _x_limit = 100
+    _height = Default.PLOT_HEIGHT
+    _x_limit = Default.BUFFER_SIZE
 
     def __call__(self) -> dict:
         return self.row
