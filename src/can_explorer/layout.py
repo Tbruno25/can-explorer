@@ -21,6 +21,7 @@ class Tag(str, Enum):
     BODY = auto()
     FOOTER = auto()
     PLOT_SCALE_SLIDER = auto()
+    PLOT_HEIGHT_SLIDER = auto()
     MAIN_BUTTON = auto()
     CLEAR_BUTTON = auto()
     PLOT_LABEL = auto()
@@ -122,6 +123,18 @@ def _footer() -> None:
                 width=-1,
                 default_value=50,
                 format="",
+            )
+
+        with dpg.group(horizontal=True):
+            dpg.add_text("Plot Height")
+            dpg.add_spacer()
+            dpg.add_slider_int(
+                tag=Tag.PLOT_HEIGHT_SLIDER,
+                width=-1,
+                default_value=DEFAULT_PLOT_HEIGHT,
+                format="",
+                min_value=50,
+                max_value=500,
             )
         dpg.add_spacer(height=2)
 

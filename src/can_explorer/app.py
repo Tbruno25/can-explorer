@@ -61,6 +61,11 @@ class MainApp:
         self._cancel.set()
         self._worker.join()
 
+    def set_plot_limit(self, x_limit: int) -> None:
+        # if not PayloadBuffer.MIN <= x_limit <= PayloadBuffer.MAX:
+        #     raise Exception(f"Error: value must be between {PayloadBuffer.MIN} - {PayloadBuffer.MAX}")
+        ...
+
 
 app = MainApp()
 

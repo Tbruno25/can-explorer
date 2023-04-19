@@ -26,15 +26,16 @@ class _Listener(Listener):
         self.buffer[msg.arbitration_id].append(val)
 
 
-class _PayloadBuffer(deque):
-    maxlen = 25
+class PayloadBuffer(deque):
+    MIN = 50
+    MAX = 2500
 
     def __init__(self):
-        super().__init__([0] * self.maxlen)
+        super().__init__([0] * self.MAX, maxlen=self.MAX)
 
 
 class Recorder:
-    data = CANData(_PayloadBuffer)
+    data = CANData(PayloadBuffer)
     bus: Optional[BusABC] = None
     _active = False
     _notifier = None
