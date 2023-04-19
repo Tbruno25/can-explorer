@@ -17,8 +17,8 @@ class MainButtonState(enum.Flag):
 class MainApp:
     _rate = 0.05
     _cancel = threading.Event()
-    _worker: Optional[threading.Thread] = None
-    _state: Optional[MainButtonState] = None
+    _worker: threading.Thread
+    _state: MainButtonState
 
     bus: Optional[can.bus.BusABC] = None
     can_recorder = can_bus.Recorder()
@@ -59,9 +59,9 @@ class MainApp:
 
     def start(self):
         if self.bus is None:
-            raise Exception("ERROR: bus not set")
+            raise Exception("ERROR: Must apply settings before starting")
 
-        self.can_recorder.bus = self.bus
+        self.can_recorder.set_bus(self.bus)
         self.can_recorder.start()
 
         self._worker = self._get_plot_worker()
@@ -105,7 +105,7 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
     )
 
     try:
-        app.bus = can.Bus(**{k: v for k, v in user_settings.items() if v})
+        app.bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
 
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)

@@ -1,6 +1,6 @@
 from collections import defaultdict, deque
 from itertools import islice
-from typing import Final, Optional
+from typing import Final
 
 from can.bus import BusABC
 from can.interfaces import VALID_INTERFACES
@@ -34,19 +34,20 @@ class PayloadBuffer(deque):
     def __init__(self):
         super().__init__([0] * self.MAX, maxlen=self.MAX)
 
-    def __getitem__(self, index) -> tuple:
+    def __getitem__(self, index) -> tuple:  # type: ignore [override]
         # Add ability to utilize slicing
         # Note: islice does not support a negative index
         if isinstance(index, slice):
             return tuple(islice(self, index.start, index.stop, index.step))
+        return tuple(deque.__getitem__(self, index))
 
 
 class Recorder:
     data = CANData(PayloadBuffer)
-    bus: Optional[BusABC] = None
     _active = False
-    _notifier = None
-    _listener = None
+    _bus: BusABC
+    _notifier: Notifier
+    _listener: _Listener
 
     @property
     def is_active(self) -> bool:
@@ -65,3 +66,6 @@ class Recorder:
             return
 
         self._notifier.stop()  # type: ignore [union-attr]
+
+    def set_bus(self, bus: BusABC) -> None:
+        self.bus = bus

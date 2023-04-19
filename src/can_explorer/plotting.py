@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Dict, Iterable, Optional
 
 import dearpygui.dearpygui as dpg
@@ -28,7 +30,7 @@ class Plot(str):
     y_axis: str
     series: str
 
-    def __new__(cls, x: Iterable, y: Iterable) -> None:
+    def __new__(cls, x: Iterable, y: Iterable) -> Plot:
         with dpg.plot(
             tag=f"{Tag.PLOT_ITEM}{dpg.generate_uuid()}", **Config.PLOT
         ) as plot:
@@ -46,7 +48,7 @@ class Plot(str):
 
 
 class Label(str):
-    def __new__(cls, can_id: int) -> None:
+    def __new__(cls, can_id: int) -> Label:
         label = dpg.add_button(
             tag=f"{Tag.PLOT_LABEL}{dpg.generate_uuid()}",
             label=hex(can_id),
@@ -85,7 +87,7 @@ class AxisData(dict):
     x: tuple
     y: tuple
 
-    def __init__(self, payloads: Iterable, limit: Optional[int] = None):
+    def __init__(self, payloads: tuple, limit: Optional[int] = None):
         x = tuple(range(len(payloads)))
         y = tuple(payloads)
         super().__init__(dict(x=x, y=y))
@@ -99,7 +101,7 @@ class PlotManager:
     def __call__(self) -> dict:
         return self.row
 
-    def _slice(self, payloads: PayloadBuffer) -> PayloadBuffer:
+    def _slice(self, payloads: PayloadBuffer) -> tuple:
         return payloads[len(payloads) - self._x_limit :]
 
     def add(self, can_id: int, payloads: PayloadBuffer) -> None:

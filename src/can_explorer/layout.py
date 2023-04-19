@@ -93,7 +93,7 @@ def _percentage(n: float, maximum: float) -> int:
     Returns:
         int: Percentage
     """
-    return 100 * n // max
+    return int(100 * n / maximum)
 
 
 def _init_fonts():
