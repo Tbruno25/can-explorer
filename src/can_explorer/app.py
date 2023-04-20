@@ -9,29 +9,29 @@ from can_explorer import can_bus, layout, plotting
 from can_explorer.layout import Default
 
 
-class MainButtonState(enum.Flag):
-    START = True
-    STOP = False
+class State(enum.Flag):
+    ACTIVE = True
+    STOPPED = False
 
 
 class MainApp:
     _rate = 0.05
     _cancel = threading.Event()
     _worker: threading.Thread
-    _state: MainButtonState
+    _state: State
 
     bus: Optional[can.bus.BusABC] = None
     can_recorder = can_bus.Recorder()
     plot_manager = plotting.PlotManager()
 
     @property
-    def is_active(self) -> bool:
-        return bool(self._active)
+    def is_active(self) -> State:
+        return bool(self._state)
 
-    def set_state(self, state: MainButtonState) -> None:
-        self._active = not state
+    def set_state(self, state: bool) -> None:
+        self._state = State(state)
 
-        if self.is_active:
+        if self._state:
             self.start()
         else:
             self.stop()
@@ -79,11 +79,8 @@ app = MainApp()
 
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
-    state = MainButtonState(user_data)
     try:
-        app.set_state(state)
-        dpg.configure_item(sender, label=state.name.capitalize(), user_data=app.is_active)  # type: ignore[union-attr]
-
+        app.set_state(layout.get_main_button_state())
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 

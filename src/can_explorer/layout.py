@@ -270,6 +270,10 @@ def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> Non
     )
 
 
+def get_main_button_state() -> bool:
+    return dpg.get_item_user_data(Tag.MAIN_BUTTON)
+
+
 def get_settings_plot_buffer() -> int:
     return dpg.get_value(Tag.SETTINGS_PLOT_BUFFER)
 
@@ -291,7 +295,16 @@ def get_settings_baudrate() -> int:
 
 
 def set_main_button_callback(callback: Callable) -> None:
-    dpg.configure_item(Tag.MAIN_BUTTON, callback=callback)
+    button_labels = ("Stop", "Start")
+
+    def wrapped_callback(sender, app_data, user_data):
+        dpg.configure_item(
+            Tag.MAIN_BUTTON, label=button_labels[user_data], user_data=not user_data
+        )
+
+        return callback(sender, app_data, user_data)
+
+    dpg.configure_item(Tag.MAIN_BUTTON, callback=wrapped_callback)
 
 
 def set_clear_button_callback(callback: Callable) -> None:
