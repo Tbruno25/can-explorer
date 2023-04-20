@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 from collections import defaultdict, deque
 from itertools import islice
-from typing import Final
+from typing import Final, MutableSequence
 
 from can.bus import BusABC
 from can.interfaces import VALID_INTERFACES
@@ -13,12 +15,8 @@ _BAUDRATES = [33_333, 125_000, 250_000, 500_000, 1_000_000]
 BAUDRATES: Final = [format(i, "_d") for i in _BAUDRATES]
 
 
-class CANData(defaultdict):
-    ...
-
-
 class _Listener(Listener):
-    def __init__(self, buffer: CANData, *args, **kwargs):
+    def __init__(self, buffer: Recorder, *args, **kwargs):
         self.buffer = buffer
         super().__init__(*args, **kwargs)
 
@@ -34,16 +32,15 @@ class PayloadBuffer(deque):
     def __init__(self):
         super().__init__([0] * self.MAX, maxlen=self.MAX)
 
-    def __getitem__(self, index) -> tuple:  # type: ignore [override]
+    def __getitem__(self, index) -> MutableSequence:
         # Add ability to utilize slicing
         # Note: islice does not support a negative index
         if isinstance(index, slice):
-            return tuple(islice(self, index.start, index.stop, index.step))
-        return tuple(deque.__getitem__(self, index))
+            return list(islice(self, index.start, index.stop, index.step))
+        return deque.__getitem__(self, index)
 
 
-class Recorder:
-    data = CANData(PayloadBuffer)
+class Recorder(defaultdict):
     _active = False
     _bus: BusABC
     _notifier: Notifier
@@ -57,7 +54,7 @@ class Recorder:
         if self.is_active:
             return
 
-        self._listener = _Listener(self.data)
+        self._listener = _Listener(self)
         self._notifier = Notifier(self.bus, [self._listener])
         self._active = True
 

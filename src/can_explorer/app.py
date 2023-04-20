@@ -41,13 +41,13 @@ class MainApp:
         Repopulate all plots in ascending order.
         """
         self.plot_manager.clear_all()
-        for can_id, payload_buffer in sorted(self.can_recorder.data.items()):
+        for can_id, payload_buffer in sorted(self.can_recorder.items()):
             self.plot_manager.add(can_id, payload_buffer)
 
     def _get_plot_worker(self) -> threading.Thread:
         def loop():
             while not self._cancel.wait(self._rate):
-                for can_id, payload_buffer in self.can_recorder.data.items():
+                for can_id, payload_buffer in self.can_recorder.items():
                     if can_id not in self.plot_manager():
                         self.repopulate()
                         break
@@ -70,6 +70,9 @@ class MainApp:
     def stop(self):
         self._cancel.set()
         self._worker.join()
+
+    def set_bus(self, bus: can.BusABC) -> None:
+        self.bus = bus
 
 
 app = MainApp()
@@ -105,38 +108,43 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
     )
 
     try:
-        app.bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
+        bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
+        app.set_bus(bus)
 
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 
 
-dpg.create_context()
+def main():
+    dpg.create_context()
+
+    with dpg.window() as app_main:
+        layout.create()
+
+    layout.set_settings_interface_options(can_bus.INTERFACES)
+    layout.set_settings_baudrate_options(can_bus.BAUDRATES)
+    layout.set_settings_apply_button_callback(settings_apply_button_callback)
+
+    layout.set_main_button_callback(start_stop_button_callback)
+    layout.set_clear_button_callback(clear_button_callback)
+
+    layout.set_plot_buffer_slider_callback(plot_buffer_slider_callback)
+    layout.set_plot_height_slider_callback(plot_height_slider_callback)
+
+    dpg.create_viewport(
+        title="CAN Explorer", width=Default.WIDTH, height=Default.HEIGHT
+    )
+    dpg.set_viewport_resize_callback(layout.resize)
+    # dpg.set_viewport_max_height(645)
+    # dpg.set_viewport_max_width(750)
+    dpg.setup_dearpygui()
+    layout.resize()
+
+    dpg.show_viewport()
+    dpg.set_primary_window(app_main, True)
+    dpg.start_dearpygui()
+    dpg.destroy_context()
 
 
-with dpg.window() as app_main:
-    layout.create()
-
-
-layout.set_settings_interface_options(can_bus.INTERFACES)
-layout.set_settings_baudrate_options(can_bus.BAUDRATES)
-layout.set_settings_apply_button_callback(settings_apply_button_callback)
-
-layout.set_main_button_callback(start_stop_button_callback)
-layout.set_clear_button_callback(clear_button_callback)
-
-layout.set_plot_buffer_slider_callback(plot_buffer_slider_callback)
-layout.set_plot_height_slider_callback(plot_height_slider_callback)
-
-
-dpg.create_viewport(title="CAN Explorer", width=Default.WIDTH, height=Default.HEIGHT)
-dpg.set_viewport_resize_callback(layout.resize)
-# dpg.set_viewport_max_height(645)
-# dpg.set_viewport_max_width(750)
-dpg.setup_dearpygui()
-layout.resize()
-
-dpg.show_viewport()
-dpg.set_primary_window(app_main, True)
-dpg.start_dearpygui()
-dpg.destroy_context()
+if __name__ == "__main__":
+    main()

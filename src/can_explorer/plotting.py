@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable, Optional
+from typing import Dict, Iterable
 
 import dearpygui.dearpygui as dpg
 
@@ -87,8 +87,8 @@ class AxisData(dict):
     x: tuple
     y: tuple
 
-    def __init__(self, payloads: tuple, limit: Optional[int] = None):
-        x = tuple(range(len(payloads)))
+    def __init__(self, payloads: Iterable):
+        x = tuple(range(len(payloads)))  # type: ignore [arg-type]
         y = tuple(payloads)
         super().__init__(dict(x=x, y=y))
 
@@ -101,7 +101,7 @@ class PlotManager:
     def __call__(self) -> dict:
         return self.row
 
-    def _slice(self, payloads: PayloadBuffer) -> tuple:
+    def _slice(self, payloads: PayloadBuffer) -> Iterable:
         return payloads[len(payloads) - self._x_limit :]
 
     def add(self, can_id: int, payloads: PayloadBuffer) -> None:
