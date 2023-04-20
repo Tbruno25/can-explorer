@@ -189,12 +189,8 @@ def _viewer_tab() -> None:
 
 def _settings_tab() -> None:
     with dpg.collapsing_header(label="CAN Bus", default_open=True):
-        dpg.add_combo(
-            tag=Tag.SETTINGS_INTERFACE, label="Interface", default_value="socketcan"
-        )
-        dpg.add_input_text(
-            tag=Tag.SETTINGS_CHANNEL, label="Channel", default_value="vcan0"
-        )
+        dpg.add_combo(tag=Tag.SETTINGS_INTERFACE, label="Interface")
+        dpg.add_input_text(tag=Tag.SETTINGS_CHANNEL, label="Channel")
         dpg.add_combo(tag=Tag.SETTINGS_BAUDRATE, label="Baudrate")
         dpg.add_spacer(height=5)
         dpg.add_button(tag=Tag.SETTINGS_APPLY, label="Apply", height=30)
