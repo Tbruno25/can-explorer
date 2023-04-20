@@ -291,6 +291,9 @@ def set_main_button_callback(callback: Callable) -> None:
     button_labels = ("Stop", "Start")
 
     def wrapped_callback(sender, app_data, user_data):
+        """
+        Set the button label and toggle the state.
+        """
         dpg.configure_item(
             Tag.MAIN_BUTTON, label=button_labels[user_data], user_data=not user_data
         )

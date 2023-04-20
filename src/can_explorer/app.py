@@ -25,10 +25,16 @@ class MainApp:
     plot_manager = plotting.PlotManager()
 
     @property
-    def is_active(self) -> State:
+    def is_active(self) -> bool:
         return bool(self._state)
 
     def set_state(self, state: bool) -> None:
+        """
+        Automatically start or stop the app based on state.
+
+        Args:
+            state (bool)
+        """
         self._state = State(state)
 
         if self._state:
@@ -44,7 +50,14 @@ class MainApp:
         for can_id, payload_buffer in sorted(self.can_recorder.items()):
             self.plot_manager.add(can_id, payload_buffer)
 
-    def _get_plot_worker(self) -> threading.Thread:
+    def _get_worker(self) -> threading.Thread:
+        """
+        Get the main loop worker thread.
+
+        Returns:
+            threading.Thread: Worker
+        """
+
         def loop():
             while not self._cancel.wait(self._rate):
                 for can_id, payload_buffer in self.can_recorder.items():
@@ -58,20 +71,32 @@ class MainApp:
         return threading.Thread(target=loop, daemon=True)
 
     def start(self):
+        """
+        Initialize and start app loop.
+
+        Raises:
+            Exception: If CAN bus does not exist.
+        """
         if self.bus is None:
             raise Exception("ERROR: Must apply settings before starting")
 
         self.can_recorder.set_bus(self.bus)
         self.can_recorder.start()
 
-        self._worker = self._get_plot_worker()
+        self._worker = self._get_worker()
         self._worker.start()
 
     def stop(self):
+        """
+        Stop the app loop.
+        """
         self._cancel.set()
         self._worker.join()
 
     def set_bus(self, bus: can.BusABC) -> None:
+        """
+        Set CAN bus to use during app loop.
+        """
         self.bus = bus
 
 
@@ -132,8 +157,6 @@ def main():
         title="CAN Explorer", width=Default.WIDTH, height=Default.HEIGHT
     )
     dpg.set_viewport_resize_callback(layout.resize)
-    # dpg.set_viewport_max_height(645)
-    # dpg.set_viewport_max_width(750)
     dpg.setup_dearpygui()
     layout.resize()
 
