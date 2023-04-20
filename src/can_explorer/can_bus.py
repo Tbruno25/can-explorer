@@ -46,6 +46,9 @@ class Recorder(defaultdict):
     _notifier: Notifier
     _listener: _Listener
 
+    def __init__(self):
+        super().__init__(PayloadBuffer)
+
     @property
     def is_active(self) -> bool:
         return self._active
