@@ -69,8 +69,8 @@ class Row:
         self.table = PlotTable()
         self.label = Label(can_id)
         self.plot = Plot(x, y)
-        self.table.add_widget(self.label)
-        self.table.add_widget(self.plot)
+        self.table.add_label(self.label)
+        self.table.add_plot(self.plot)
         self.table.submit()
         self.set_height(height)
 

@@ -68,19 +68,17 @@ class PercentageWidthTableRow:
 
 
 class PlotTable(PercentageWidthTableRow):
-    COLUMN_1_PERCENTAGE: Final = 15
-    COLUMN_2_PERCENTAGE: Final = 85
+    COLUMN_1_WIDTH: Final = 15
+    COLUMN_2_WIDTH: Final = 85
 
     def __init__(self, **kwargs):
         super().__init__(parent=Tag.TAB_VIEWER, **kwargs)
 
-    def add_widget(self, uuid):
-        if uuid.startswith(str(Tag.PLOT_LABEL)):
-            percentage = self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith(str(Tag.PLOT_ITEM)):
-            percentage = self.COLUMN_2_PERCENTAGE
+    def add_label(self, uuid):
+        return super().add_widget(uuid, self.COLUMN_1_WIDTH)
 
-        return super().add_widget(uuid, percentage)
+    def add_plot(self, uuid):
+        return super().add_widget(uuid, self.COLUMN_2_WIDTH)
 
 
 def _init_fonts():
