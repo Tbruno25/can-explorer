@@ -5,8 +5,9 @@ from typing import Callable, Final, Iterable, Union
 import dearpygui.dearpygui as dpg
 
 from can_explorer.can_bus import PayloadBuffer
+from can_explorer.resources import Percentage
 
-RESOURCES_DIR = Path(__file__).parents[2] / "resources"
+RESOURCES_DIR = Path(__file__).parent / "resources"
 
 
 class Default:
@@ -74,26 +75,12 @@ class PlotTable(PercentageWidthTableRow):
         super().__init__(parent=Tag.TAB_VIEWER, **kwargs)
 
     def add_widget(self, uuid):
-        if uuid.startswith("Tag.PLOT_LABEL"):
+        if uuid.startswith(str(Tag.PLOT_LABEL)):
             percentage = self.COLUMN_1_PERCENTAGE
-        elif uuid.startswith("Tag.PLOT_ITEM"):
+        elif uuid.startswith(str(Tag.PLOT_ITEM)):
             percentage = self.COLUMN_2_PERCENTAGE
 
         return super().add_widget(uuid, percentage)
-
-
-def _percentage(n: float, maximum: float) -> int:
-    """
-    Calculate a percentage.
-
-    Args:
-        n (float): Current value
-        maximum (float): Total value
-
-    Returns:
-        int: Percentage
-    """
-    return int(100 * n / maximum)
 
 
 def _init_fonts():
@@ -155,11 +142,13 @@ def _footer() -> None:
                     dpg.add_slider_int(
                         tag=Tag.SETTINGS_PLOT_BUFFER,
                         width=-1,
-                        default_value=Default.BUFFER_SIZE,
-                        min_value=PayloadBuffer.MIN,
-                        max_value=PayloadBuffer.MAX,
+                        default_value=Percentage.get(
+                            Default.BUFFER_SIZE, PayloadBuffer.MAX
+                        ),
+                        min_value=2,
+                        max_value=100,
                         clamped=True,
-                        format="%d",
+                        format="%d%%",
                     )
 
                 with dpg.group(horizontal=True):
@@ -168,11 +157,11 @@ def _footer() -> None:
                     dpg.add_slider_int(
                         tag=Tag.SETTINGS_PLOT_HEIGHT,
                         width=-1,
-                        default_value=Default.PLOT_HEIGHT,
-                        min_value=50,
-                        max_value=500,
+                        default_value=Percentage.get(Default.PLOT_HEIGHT, 500),
+                        min_value=10,
+                        max_value=100,
                         clamped=True,
-                        format="%dpx",
+                        format="%d%%",
                     )
         dpg.add_spacer(height=2)
 
@@ -275,11 +264,15 @@ def get_main_button_state() -> bool:
 
 
 def get_settings_plot_buffer() -> int:
-    return dpg.get_value(Tag.SETTINGS_PLOT_BUFFER)
+    max_value = PayloadBuffer.MAX
+    percentage = dpg.get_value(Tag.SETTINGS_PLOT_BUFFER)
+    return Percentage.reverse(percentage, max_value)
 
 
 def get_settings_plot_height() -> int:
-    return dpg.get_value(Tag.SETTINGS_PLOT_HEIGHT)
+    max_value = 500  # px
+    percentage = dpg.get_value(Tag.SETTINGS_PLOT_HEIGHT)
+    return Percentage.reverse(percentage, max_value)
 
 
 def get_settings_interface() -> str:
