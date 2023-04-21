@@ -7,10 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
 ## [0.1.0] - 2023-04-21
+
+### Fixed
+
+- Runtime errors when testing using ICSim
+
+### Added
+
+- Project logo and demo resources
+- README
+
+---
+## [0.1.0] - 2023-04-20
 
 ### Added
 
 - Reimplementation using DearPyGui
-
-----
