@@ -5,7 +5,7 @@ description = "Visualize CAN bus payloads in real time"
 license = "GPL-3.0-or-later"
 authors = ["TJ <tbruno25@gmail.com>"]
 # maintainers = ["TJ <tbruno25@gmail.com>"]
-# readme = "README.md"
+readme = "README.md"
 repository = "https://github.com/Tbruno25/can-explorer"
 keywords = ["can", "bus", "canbus", "can_bus", "dbc"]
 
