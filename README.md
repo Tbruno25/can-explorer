@@ -1,7 +1,7 @@
 <h1 align="center">
   <a href="https://github.com/tbruno25/can-explorer">
     <!-- Please provide path to your logo here -->
-    <img src="docs/images/logo.png" alt="Logo" width="200" height="200">
+    <img src="https://github.com/Tbruno25/can-explorer/raw/main/docs/images/logo.png" alt="Logo" width="200" height="200">
   </a>
 </h1>
 
@@ -30,15 +30,15 @@
 
 A CAN bus visualization tool to aid in reverse engineering
 
-[![Demo](./docs/images/demo.gif)
+[![Demo](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/demo.gif)
 
 </details>
 
 ### Built With
 
 
-[![DearPyGui](./docs/images/dearpygui-logo1.png)](https://github.com/hoffstadt/DearPyGui)$~$
-[![PythonCan](./docs/images/pythoncan-logo.png)](https://github.com/hardbyte/python-can)
+[![DearPyGui](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/dearpygui-logo.png)](https://github.com/hoffstadt/DearPyGui)$~$
+[![PythonCan](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/pythoncan-logo.png)](https://github.com/hardbyte/python-can)
 
 ## Getting Started
 
