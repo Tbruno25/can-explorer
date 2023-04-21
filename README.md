@@ -1,53 +1,77 @@
-# CanoPy
+<h1 align="center">
+  <a href="https://github.com/tbruno25/can-explorer">
+    <!-- Please provide path to your logo here -->
+    <img src="docs/images/logo.png" alt="Logo" width="200" height="200">
+  </a>
+</h1>
 
-Canopy is a visualization tool for plotting CAN bus message payloads.
+<div align="center">
+  can-explorer
+  <br />
+  <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
+  ·
+  <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feature%3A+">Request a Feature</a>
+  .
+  <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+">Ask a Question</a>
+</div>
 
-## Installation
+<div align="center">
+<br />
 
-```
-$ pip install canopy-viz
-```
+
+[![PyPI version](https://img.shields.io/pypi/v/can-explorer?color=mediumseagreen)](https://pypi.org/project/can-explorer/)
+![Python Versions](https://img.shields.io/pypi/pyversions/can-explorer?color=mediumseagreen)
+
+</div>
+
+---
+
+## About
+
+A CAN bus visualization tool to aid in reverse engineering
+
+[![Demo](./docs/images/demo.gif)
+
+</details>
+
+### Built With
+
+
+[![DearPyGui](./docs/images/dearpygui-logo1.png)](https://github.com/hoffstadt/DearPyGui)$~$
+[![PythonCan](./docs/images/pythoncan-logo.png)](https://github.com/hardbyte/python-can)
+
+## Getting Started
+
+### Installation
+
+`pipx` is recommended although `pip` can also be used
+
+```sh
+pipx install can-explorer
+``` 
 
 ## Usage
 
-Run `canopy` from the command line with the appropriate arguments per your adapter.
-Refer to the python-can [docs](https://python-can.readthedocs.io/en/master/configuration.html#in-code) for argument info.
+Run ```can-explorer``` from the terminal to launch gui
 
-```
-$ canopy -i socketcan -c can0 -b 500000
-```
 
-Pressing `i` on your keyboard will ignore and clear all currently displayed id's.
-Using `arrow up` or `arrow down` will adjust message buffer sizes.
+## Support
 
-Alternatively, a saved log file can be visualized by redirecting the output to a virtual interface.
+Reach out to the maintainer at one of the following places:
+- [GitHub issues](https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+)
+- Contact options listed on [this GitHub profile](https://github.com/tbruno25)
 
-First ensure the interface is up
-```
-$ sudo modprobe vcan
-$ sudo ip link add dev vcan0 type vcan
-$ sudo ip link set up vcan0
-```
+If you want to say **thank you** or/and support active development of can-explorer consider adding a [GitHub Star](https://github.com/tbruno25/can-explorer) to the project.
 
-Then start CanoPy
-```
-$ canopy -i socketcan -c vcan0
-```
 
-And use `canplayer` to replay the log file while redirecting output
-```
-$ canplayer -I candump-messages.log vcan0=can0
-```
+## Contributing
 
-## Screenshot
+Please read [our contribution guidelines](docs/CONTRIBUTING.md)
 
-![](https://i.ibb.co/ynrNndq/Screenshot-from-2021-04-16-12-23-26.png)
-
-## Todo
-
-- Display id's sorted from min to max
-- Add a way to remove specific id's
-- Implement unit/integration tests
+For a full list of all authors and contributors, see [the contributors page](https://github.com/tbruno25/can-explorer/contributors).
 
 ## License
-[MIT](https://choosealicense.com/licenses/mit/)
+
+This project is licensed under the **GNU General Public License v3**.
+
+See [LICENSE](LICENSE) for more information.
