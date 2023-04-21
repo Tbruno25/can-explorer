@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from itertools import islice
-from typing import Final, MutableSequence
+from typing import Final
 
 from can.bus import BusABC
 from can.interfaces import VALID_INTERFACES
@@ -32,12 +31,12 @@ class PayloadBuffer(deque):
     def __init__(self):
         super().__init__([0] * self.MAX, maxlen=self.MAX)
 
-    def __getitem__(self, index) -> MutableSequence:
+    def __getitem__(self, index) -> tuple:
         # Add ability to utilize slicing
-        # Note: islice does not support a negative index
+        # Note: must convert deque to avoid runtime error
         if isinstance(index, slice):
-            return list(islice(self, index.start, index.stop, index.step))
-        return deque.__getitem__(self, index)
+            return tuple(self)[index.start : index.stop : index.step]
+        return tuple(deque.__getitem__(self, index))
 
 
 class Recorder(defaultdict):

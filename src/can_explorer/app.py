@@ -60,12 +60,14 @@ class MainApp:
 
         def loop():
             while not self._cancel.wait(self._rate):
-                for can_id, payload_buffer in self.can_recorder.items():
+                for can_id in tuple(
+                    self.can_recorder  # Note: must convert can_recorder to avoid runtime error
+                ):
                     if can_id not in self.plot_manager():
                         self.repopulate()
                         break
                     else:
-                        self.plot_manager.update(can_id, payload_buffer)
+                        self.plot_manager.update(can_id, self.can_recorder[can_id])
             self._cancel.clear()
 
         return threading.Thread(target=loop, daemon=True)
