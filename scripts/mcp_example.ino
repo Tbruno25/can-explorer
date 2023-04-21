@@ -1,15 +1,12 @@
 /*
 ####################################################################################
-example sketch to use arduino as CAN interface over serial with python-can / CanoPy
-https://github.com/Tbruno25/canopy
+example sketch to use arduino as CAN interface over serial with python-can / can-explorer
+https://github.com/tbruno25/can-explorer
 
 mcp_can library | https://github.com/coryjfowler/MCP_CAN_lib
 default 500K baudrate / 8MHz clock speed
 
 channel = "COM1" #Windows OR "/dev/ttyACM0" #Linux 
-    
-example:
-    canopy -i serial -c COM1 -b 115200
 ####################################################################################
 */
 
