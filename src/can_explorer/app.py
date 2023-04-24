@@ -37,10 +37,7 @@ class MainApp:
         """
         self._state = State(state)
 
-        if self._state:
-            self.start()
-        else:
-            self.stop()
+        self.start() if self._state else self.stop()
 
     def repopulate(self) -> None:
         """

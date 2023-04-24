@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict, deque
-from typing import Final
+from typing import Final, Optional
 
 from can.bus import BusABC
 from can.interfaces import VALID_INTERFACES
@@ -41,9 +41,9 @@ class PayloadBuffer(deque):
 
 class Recorder(defaultdict):
     _active = False
-    _bus: BusABC
     _notifier: Notifier
     _listener: _Listener
+    _bus: Optional[BusABC] = None
 
     def __init__(self):
         super().__init__(PayloadBuffer)
@@ -57,7 +57,7 @@ class Recorder(defaultdict):
             return
 
         self._listener = _Listener(self)
-        self._notifier = Notifier(self.bus, [self._listener])
+        self._notifier = Notifier(self._bus, [self._listener])
         self._active = True
 
     def stop(self) -> None:
@@ -67,4 +67,4 @@ class Recorder(defaultdict):
         self._notifier.stop()  # type: ignore [union-attr]
 
     def set_bus(self, bus: BusABC) -> None:
-        self.bus = bus
+        self._bus = bus
