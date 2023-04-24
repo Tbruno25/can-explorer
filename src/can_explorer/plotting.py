@@ -63,7 +63,6 @@ class Row:
     table: PlotTable
     label: Label
     plot: Plot
-    height: int
 
     def __init__(self, can_id: int, height: int, x: Iterable, y: Iterable) -> None:
         self.table = PlotTable()

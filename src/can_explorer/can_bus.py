@@ -31,7 +31,7 @@ class PayloadBuffer(deque):
     def __init__(self):
         super().__init__([0] * self.MAX, maxlen=self.MAX)
 
-    def __getitem__(self, index) -> tuple:
+    def __getitem__(self, index) -> tuple:  # type: ignore [override]
         # Add ability to utilize slicing
         # Note: must convert deque to avoid runtime error
         if isinstance(index, slice):

@@ -28,23 +28,32 @@
 
 ## About
 
-A CAN bus visualization tool to aid in reverse engineering
+`can-explorer` is a CAN bus visualization tool designed to aid in reverse engineering.
 
-[![Demo](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/demo.gif)
-
+<br>
+<div align="center">
+<img src="https://github.com/Tbruno25/can-explorer/raw/main/docs/images/demo.gif" alt="Demo">
+</div>
+<br>
 </details>
+
+### How does this help me?
+By continuously plotting all payloads for each CAN id, spotting trends that correspond to a specific action can become signicantly easier to identify. 
+
+Please refer to this [prior article](https://tbruno25.medium.com/car-hacking-faster-reverse-engineering-using-canopy-be1955843d57) I wrote for a working example of how this approach can be used to find which id includes speedmoter data.
+
 
 ### Built With
 
 
-[![DearPyGui](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/dearpygui-logo.png)](https://github.com/hoffstadt/DearPyGui)$~$
+[![DearPyGui](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/dearpygui-logo.png)](https://github.com/hoffstadt/DearPyGui)
 [![PythonCan](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/pythoncan-logo.png)](https://github.com/hardbyte/python-can)
 
 ## Getting Started
 
 ### Installation
 
-`pipx` is recommended although `pip` can also be used
+[pipx](https://pypa.github.io/pipx/) is recommended although any package manager that supports `pyproject.toml` files can be used.
 
 ```sh
 pipx install can-explorer
@@ -52,7 +61,16 @@ pipx install can-explorer
 
 ## Usage
 
-Run ```can-explorer``` from the terminal to launch gui
+The gui can be launched by running one of the below commands from a terminal.
+```sh 
+can-explorer
+``` 
+
+```sh 
+python3 -m can_explorer
+``` 
+
+Before starting the viewer, you ***must*** navigate to the settings tab and input your adapter configuration to create a bus instance. Please refer to the [python-can docs](https://python-can.readthedocs.io/en/stable/index.html) for more information regarding the various interfaces supported. 
 
 
 ## Support
