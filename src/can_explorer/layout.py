@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Callable, Final, Iterable, Union
 
 import dearpygui.dearpygui as dpg
+from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.can_bus import PayloadBuffer
 from can_explorer.resources import Percentage
@@ -20,8 +21,14 @@ class Default:
 
 
 class Font:
-    DEFAULT: str
-    LABEL: str
+    DEFAULT: int
+    LABEL: int
+
+
+class Theme:
+    DEFAULT: int
+    LIGHT: int
+    MIDNIGHT: int
 
 
 @unique
@@ -91,6 +98,11 @@ def _init_fonts():
 
 
 def _init_themes():
+    global Theme
+
+    Theme.DEFAULT = 0
+    Theme.LIGHT = create_theme_imgui_light()
+
     default_background = (50, 50, 50, 255)
     with dpg.theme() as disabled_theme:
         with dpg.theme_component(dpg.mvButton, enabled_state=False):
@@ -195,6 +207,14 @@ def _settings_tab() -> None:
         dpg.add_spacer(height=5)
 
     with dpg.collapsing_header(label="GUI"):
+
+        def light_theme_calllback(sender, app_data, user_data):
+            dpg.bind_theme(Theme.LIGHT if dpg.get_value(sender) else Theme.DEFAULT)
+
+        with dpg.group(horizontal=True):
+            dpg.add_text("Light Theme")
+            dpg.add_checkbox(callback=light_theme_calllback)
+
         dpg.add_button(
             label="Launch Font Manager", width=-1, callback=dpg.show_font_manager
         )
