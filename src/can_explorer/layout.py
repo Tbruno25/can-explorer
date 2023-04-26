@@ -206,13 +206,13 @@ def _settings_tab() -> None:
         dpg.add_spacer(height=5)
 
     with dpg.collapsing_header(label="GUI"):
-
-        def light_theme_calllback(sender, app_data, user_data):
-            dpg.bind_theme(Theme.LIGHT if dpg.get_value(sender) else Theme.DEFAULT)
-
         with dpg.group(horizontal=True):
             dpg.add_text("Light Theme")
-            dpg.add_checkbox(callback=light_theme_calllback)
+            dpg.add_checkbox(
+                callback=lambda sender: dpg.bind_theme(
+                    Theme.LIGHT if dpg.get_value(sender) else Theme.DEFAULT
+                )
+            )
 
         dpg.add_button(
             label="Launch Font Manager", width=-1, callback=dpg.show_font_manager
@@ -241,10 +241,6 @@ def resize() -> None:
 def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> None:
     # https://github.com/hoffstadt/DearPyGui/discussions/1308
 
-    def on_selection(sender, unused, user_data):
-        # delete window
-        dpg.delete_item(user_data[0])
-
     # guarantee these commands happen in the same frame
     with dpg.mutex():
         viewport_width = dpg.get_viewport_client_width()
@@ -259,7 +255,9 @@ def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> Non
                     label="Close",
                     width=-1,
                     user_data=(modal_id, True),
-                    callback=on_selection,
+                    callback=lambda sender, app_data, user_data: dpg.delete_item(
+                        user_data[0]
+                    ),
                 )
 
     # guarantee these commands happen in another frame
