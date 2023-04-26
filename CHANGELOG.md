@@ -8,11 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ---
-## [0.1.0] - 2023-04-21
+## [0.1.2] - 2023-04-25
+
+### Added
+
+- Alternate method to launch app via `python -m can_explorer`
+- Light theme GUI setting
+
+---
+## [0.1.1] - 2023-04-21
 
 ### Fixed
 
-- Runtime errors when testing using ICSim
+- Runtime errors encountered when testing app with `ICSim`
 
 ### Added
 
