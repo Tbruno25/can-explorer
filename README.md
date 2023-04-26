@@ -30,12 +30,7 @@
 
 `can-explorer` is a CAN bus visualization tool designed to aid in reverse engineering.
 
-<br>
-<div align="center">
-<img src="https://github.com/Tbruno25/can-explorer/raw/main/docs/images/demo.gif" alt="Demo">
-</div>
-<br>
-</details>
+![Demo](https://github.com/Tbruno25/can-explorer/raw/main/docs/images/demo.gif)
 
 ### How does this help me?
 By continuously plotting all payloads for each CAN id, spotting trends that correspond to a specific action can become signicantly easier to identify. 

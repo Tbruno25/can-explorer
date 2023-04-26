@@ -28,7 +28,6 @@ class Font:
 class Theme:
     DEFAULT: int
     LIGHT: int
-    MIDNIGHT: int
 
 
 @unique
