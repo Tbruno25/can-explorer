@@ -1,6 +1,6 @@
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Callable, Final, Iterable, Union
+from typing import Callable, Final, Iterable, Union, cast
 
 import dearpygui.dearpygui as dpg
 from dearpygui_ext.themes import create_theme_imgui_light
@@ -17,6 +17,7 @@ class Default:
     FONT_HEIGHT: Final = 14
     PLOT_HEIGHT: Final = 100
     BUFFER_SIZE: Final = 100
+    ID_FORMAT: Final = hex
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
 
 
@@ -47,6 +48,7 @@ class Tag(str, Enum):
     SETTINGS_CHANNEL = auto()
     SETTINGS_BAUDRATE = auto()
     SETTINGS_APPLY = auto()
+    SETTINGS_ID_FORMAT = auto()
 
 
 class PercentageWidthTableRow:
@@ -207,11 +209,20 @@ def _settings_tab() -> None:
 
     with dpg.collapsing_header(label="GUI"):
         with dpg.group(horizontal=True):
-            dpg.add_text("Light Theme")
-            dpg.add_checkbox(
+            dpg.add_text("ID Format")
+            dpg.add_radio_button(
+                ["Hex", "Dec"],
+                tag=Tag.SETTINGS_ID_FORMAT,
+                horizontal=True,
+            )
+        with dpg.group(horizontal=True):
+            dpg.add_text("Theme")
+            dpg.add_radio_button(
+                ["Default", "Light"],
+                horizontal=True,
                 callback=lambda sender: dpg.bind_theme(
-                    Theme.LIGHT if dpg.get_value(sender) else Theme.DEFAULT
-                )
+                    getattr(Theme, dpg.get_value(sender).upper())
+                ),
             )
 
         dpg.add_button(
@@ -298,6 +309,12 @@ def get_settings_baudrate() -> int:
     return dpg.get_value(Tag.SETTINGS_BAUDRATE)
 
 
+def get_settings_id_format() -> Callable:
+    return cast(
+        Callable, hex if dpg.get_value(Tag.SETTINGS_ID_FORMAT).lower() == "hex" else int
+    )
+
+
 def set_main_button_callback(callback: Callable) -> None:
     button_labels = ("Stop", "Start")
 
@@ -328,6 +345,10 @@ def set_plot_height_slider_callback(callback: Callable) -> None:
 
 def set_settings_apply_button_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.SETTINGS_APPLY, callback=callback)
+
+
+def set_settings_can_id_format_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_ID_FORMAT, callback=callback)
 
 
 def set_settings_interface_options(iterable: Iterable[str]) -> None:

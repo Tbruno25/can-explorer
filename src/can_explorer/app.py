@@ -136,6 +136,11 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
         layout.popup_error(name=type(e).__name__, info=e)
 
 
+def settings_can_id_format_callback(sender, app_data, user_data) -> None:
+    app.plot_manager.set_id_format(layout.get_settings_id_format())
+    app.repopulate()
+
+
 def main():
     dpg.create_context()
 
@@ -145,6 +150,7 @@ def main():
     layout.set_settings_interface_options(can_bus.INTERFACES)
     layout.set_settings_baudrate_options(can_bus.BAUDRATES)
     layout.set_settings_apply_button_callback(settings_apply_button_callback)
+    layout.set_settings_can_id_format_callback(settings_can_id_format_callback)
 
     layout.set_main_button_callback(start_stop_button_callback)
     layout.set_clear_button_callback(clear_button_callback)
