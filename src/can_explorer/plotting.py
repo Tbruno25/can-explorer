@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, Iterable
+import uuid
+from typing import Callable, Dict, Iterable
 
 import dearpygui.dearpygui as dpg
 
@@ -31,9 +32,7 @@ class Plot(str):
     series: str
 
     def __new__(cls, x: Iterable, y: Iterable) -> Plot:
-        with dpg.plot(
-            tag=f"{Tag.PLOT_ITEM}{dpg.generate_uuid()}", **Config.PLOT
-        ) as plot:
+        with dpg.plot(tag=f"{Tag.PLOT_ITEM}{uuid.uuid4()}", **Config.PLOT) as plot:
             plot = super().__new__(cls, plot)
             plot.x_axis = dpg.add_plot_axis(**Config.X_AXIS)
             plot.y_axis = dpg.add_plot_axis(**Config.Y_AXIS)
@@ -48,10 +47,9 @@ class Plot(str):
 
 
 class Label(str):
-    def __new__(cls, can_id: int) -> Label:
+    def __new__(cls) -> Label:
         label = dpg.add_button(
-            tag=f"{Tag.PLOT_LABEL}{dpg.generate_uuid()}",
-            label=hex(can_id),
+            tag=f"{Tag.PLOT_LABEL}{uuid.uuid4()}",
             **Config.LABEL,
         )
         dpg.bind_item_font(label, Font.LABEL)
@@ -63,20 +61,30 @@ class Row:
     table: PlotTable
     label: Label
     plot: Plot
+    height: int
+    label_format: Callable
 
-    def __init__(self, can_id: int, height: int, x: Iterable, y: Iterable) -> None:
+    def __init__(
+        self, can_id: int, id_format: Callable, height: int, x: Iterable, y: Iterable
+    ) -> None:
+        self._can_id = can_id
         self.table = PlotTable()
-        self.label = Label(can_id)
+        self.label = Label()
         self.plot = Plot(x, y)
         self.table.add_label(self.label)
         self.table.add_plot(self.plot)
         self.table.submit()
+        self.set_label(id_format)
         self.set_height(height)
 
     def set_height(self, height: int) -> None:
         dpg.set_item_height(self.label, height)
         dpg.set_item_height(self.plot, height)
         self.height = height
+
+    def set_label(self, id_format: Callable) -> None:
+        dpg.set_item_label(self.label, id_format(self._can_id))
+        self.label_format = id_format
 
     def delete(self) -> None:
         dpg.delete_item(self.table.table_id)
@@ -96,6 +104,7 @@ class PlotManager:
     row: Dict[int, Row] = {}
     _height = Default.PLOT_HEIGHT
     _x_limit = Default.BUFFER_SIZE
+    _id_format: Callable = Default.ID_FORMAT
 
     def __call__(self) -> dict[int, Row]:
         """
@@ -134,7 +143,9 @@ class PlotManager:
         if can_id in self.row:
             raise Exception(f"Error: id {can_id} already exists")
 
-        row = Row(can_id, self._height, **AxisData(self._slice(payloads)))
+        row = Row(
+            can_id, self._id_format, self._height, **AxisData(self._slice(payloads))
+        )
         self.row[can_id] = row
 
     def delete(self, can_id: int) -> None:
@@ -162,6 +173,9 @@ class PlotManager:
         if row.height != self._height:
             row.set_height(self._height)
 
+        if row.label_format != self._id_format:
+            row.set_label(self._id_format)
+
         row.plot.update(**AxisData(self._slice(payloads)))
 
     def clear_all(self) -> None:
@@ -181,6 +195,15 @@ class PlotManager:
             height (int): Height in pixels
         """
         self._height = height
+
+    def set_id_format(self, id_format: Callable) -> None:
+        """
+        Set the format CAN id's will be displayed as.
+
+        Args:
+            id_format (Callable)
+        """
+        self._id_format = id_format
 
     def set_limit(self, x_limit: int) -> None:
         """

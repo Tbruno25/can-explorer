@@ -2,8 +2,6 @@ name: CI
 
 on:
   pull_request:
-  push:
-    branches: ['main', 'dev']
 
 jobs:
   pre-commit:
@@ -13,7 +11,7 @@ jobs:
     - uses: actions/setup-python@v3
     - uses: pre-commit/action@v3.0.0
 
-  test:
+  check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -31,7 +29,9 @@ jobs:
     - name: Setup container display
       # https://arbitrary-but-fixed.net/2022/01/21/headless-gui-github-actions.html
       run: Xvfb :1 -screen 0 1600x1200x24 &
-    - name: Test with pytest
+    - name: Pytest
       run: poetry run pytest -v
       env:
         DISPLAY: :1
+    - name: Mypy
+      run: poetry run mypy src

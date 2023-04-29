@@ -1,6 +1,6 @@
 from enum import Enum, auto, unique
 from pathlib import Path
-from typing import Callable, Final, Iterable, Union
+from typing import Callable, Final, Iterable, Union, cast
 
 import dearpygui.dearpygui as dpg
 from dearpygui_ext.themes import create_theme_imgui_light
@@ -17,6 +17,7 @@ class Default:
     FONT_HEIGHT: Final = 14
     PLOT_HEIGHT: Final = 100
     BUFFER_SIZE: Final = 100
+    ID_FORMAT: Final = hex
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
 
 
@@ -28,7 +29,6 @@ class Font:
 class Theme:
     DEFAULT: int
     LIGHT: int
-    MIDNIGHT: int
 
 
 @unique
@@ -48,6 +48,7 @@ class Tag(str, Enum):
     SETTINGS_CHANNEL = auto()
     SETTINGS_BAUDRATE = auto()
     SETTINGS_APPLY = auto()
+    SETTINGS_ID_FORMAT = auto()
 
 
 class PercentageWidthTableRow:
@@ -207,13 +208,22 @@ def _settings_tab() -> None:
         dpg.add_spacer(height=5)
 
     with dpg.collapsing_header(label="GUI"):
-
-        def light_theme_calllback(sender, app_data, user_data):
-            dpg.bind_theme(Theme.LIGHT if dpg.get_value(sender) else Theme.DEFAULT)
-
         with dpg.group(horizontal=True):
-            dpg.add_text("Light Theme")
-            dpg.add_checkbox(callback=light_theme_calllback)
+            dpg.add_text("ID Format")
+            dpg.add_radio_button(
+                ["Hex", "Dec"],
+                tag=Tag.SETTINGS_ID_FORMAT,
+                horizontal=True,
+            )
+        with dpg.group(horizontal=True):
+            dpg.add_text("Theme")
+            dpg.add_radio_button(
+                ["Default", "Light"],
+                horizontal=True,
+                callback=lambda sender: dpg.bind_theme(
+                    getattr(Theme, dpg.get_value(sender).upper())
+                ),
+            )
 
         dpg.add_button(
             label="Launch Font Manager", width=-1, callback=dpg.show_font_manager
@@ -242,10 +252,6 @@ def resize() -> None:
 def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> None:
     # https://github.com/hoffstadt/DearPyGui/discussions/1308
 
-    def on_selection(sender, unused, user_data):
-        # delete window
-        dpg.delete_item(user_data[0])
-
     # guarantee these commands happen in the same frame
     with dpg.mutex():
         viewport_width = dpg.get_viewport_client_width()
@@ -260,7 +266,9 @@ def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> Non
                     label="Close",
                     width=-1,
                     user_data=(modal_id, True),
-                    callback=on_selection,
+                    callback=lambda sender, app_data, user_data: dpg.delete_item(
+                        user_data[0]
+                    ),
                 )
 
     # guarantee these commands happen in another frame
@@ -301,6 +309,12 @@ def get_settings_baudrate() -> int:
     return dpg.get_value(Tag.SETTINGS_BAUDRATE)
 
 
+def get_settings_id_format() -> Callable:
+    return cast(
+        Callable, hex if dpg.get_value(Tag.SETTINGS_ID_FORMAT).lower() == "hex" else int
+    )
+
+
 def set_main_button_callback(callback: Callable) -> None:
     button_labels = ("Stop", "Start")
 
@@ -331,6 +345,10 @@ def set_plot_height_slider_callback(callback: Callable) -> None:
 
 def set_settings_apply_button_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.SETTINGS_APPLY, callback=callback)
+
+
+def set_settings_can_id_format_callback(callback: Callable) -> None:
+    dpg.configure_item(Tag.SETTINGS_ID_FORMAT, callback=callback)
 
 
 def set_settings_interface_options(iterable: Iterable[str]) -> None:
