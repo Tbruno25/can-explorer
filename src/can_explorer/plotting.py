@@ -102,6 +102,7 @@ class AxisData(dict):
 
 class PlotManager:
     row: Dict[int, Row] = {}
+    payload: Dict[int, PayloadBuffer] = {}
     _height = Default.PLOT_HEIGHT
     _x_limit = Default.BUFFER_SIZE
     _id_format: Callable = Default.ID_FORMAT
@@ -146,6 +147,8 @@ class PlotManager:
         row = Row(
             can_id, self._id_format, self._height, **AxisData(self._slice(payloads))
         )
+
+        self.payload[can_id] = payloads
         self.row[can_id] = row
 
     def delete(self, can_id: int) -> None:
@@ -155,14 +158,13 @@ class PlotManager:
         Args:
             can_id (int)
         """
+        self.payload[can_id].pop()
         self.row[can_id].delete()
         self.row.pop(can_id)
 
-    def update(self, can_id: int, payloads: PayloadBuffer) -> None:
+    def update(self, can_id: int) -> None:
         """
         Update a plot.
-
-        Note: Current PlotManager height and limit values are automatically applied.
 
         Args:
             can_id (int)
@@ -170,13 +172,7 @@ class PlotManager:
         """
         row = self.row[can_id]
 
-        if row.height != self._height:
-            row.set_height(self._height)
-
-        if row.label_format != self._id_format:
-            row.set_label(self._id_format)
-
-        row.plot.update(**AxisData(self._slice(payloads)))
+        row.plot.update(**AxisData(self._slice(self.payload[can_id])))
 
     def clear_all(self) -> None:
         """
@@ -189,12 +185,13 @@ class PlotManager:
         """
         Set height to use for plots.
 
-        Note: Won't affect existing plots until update() is called
-
         Args:
             height (int): Height in pixels
         """
         self._height = height
+
+        for row in self.row.values():
+            row.set_height(self._height)
 
     def set_id_format(self, id_format: Callable) -> None:
         """
@@ -205,13 +202,17 @@ class PlotManager:
         """
         self._id_format = id_format
 
+        for row in self.row.values():
+            row.set_label(self._id_format)
+
     def set_limit(self, x_limit: int) -> None:
         """
         Set the number of payloads to plot on the x axis.
-
-        Note: Won't affect existing plots until update() is called
 
         Args:
             x_limit (int): Number of payloads
         """
         self._x_limit = x_limit
+
+        for can_id in self.row:
+            self.update(can_id)

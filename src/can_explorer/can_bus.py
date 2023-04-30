@@ -65,6 +65,7 @@ class Recorder(defaultdict):
             return
 
         self._notifier.stop()  # type: ignore [union-attr]
+        self._active = False
 
     def set_bus(self, bus: BusABC) -> None:
         self._bus = bus
