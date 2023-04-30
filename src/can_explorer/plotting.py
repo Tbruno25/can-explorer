@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import uuid
 from typing import Callable, Dict, Iterable
 
 import dearpygui.dearpygui as dpg
 
 from can_explorer.can_bus import PayloadBuffer
-from can_explorer.layout import Default, Font, PlotTable, Tag
+from can_explorer.layout import Default, Font, PlotTable
+from can_explorer.resources import generate_tag
 
 
 class Config:
@@ -32,7 +32,7 @@ class Plot(str):
     series: str
 
     def __new__(cls, x: Iterable, y: Iterable) -> Plot:
-        with dpg.plot(tag=f"{Tag.PLOT_ITEM}{uuid.uuid4()}", **Config.PLOT) as plot:
+        with dpg.plot(tag=str(generate_tag()), **Config.PLOT) as plot:
             plot = super().__new__(cls, plot)
             plot.x_axis = dpg.add_plot_axis(**Config.X_AXIS)
             plot.y_axis = dpg.add_plot_axis(**Config.Y_AXIS)
@@ -49,7 +49,7 @@ class Plot(str):
 class Label(str):
     def __new__(cls) -> Label:
         label = dpg.add_button(
-            tag=f"{Tag.PLOT_LABEL}{uuid.uuid4()}",
+            tag=str(generate_tag()),
             **Config.LABEL,
         )
         dpg.bind_item_font(label, Font.LABEL)

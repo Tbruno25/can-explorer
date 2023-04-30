@@ -36,8 +36,6 @@ class Tag(str, Enum):
     FOOTER = auto()
     MAIN_BUTTON = auto()
     CLEAR_BUTTON = auto()
-    PLOT_LABEL = auto()
-    PLOT_ITEM = auto()
     TAB_VIEWER = auto()
     TAB_SETTINGS = auto()
     SETTINGS_PLOT_BUFFER = auto()
