@@ -97,16 +97,16 @@ def _init_fonts():
 def _init_themes():
     global Theme
 
-    Theme.DEFAULT = 0
-    Theme.LIGHT = create_theme_imgui_light()
-
     default_background = (50, 50, 50, 255)
-    with dpg.theme() as disabled_theme:
+    with dpg.theme() as default:
         with dpg.theme_component(dpg.mvButton, enabled_state=False):
             dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, default_background)
             dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, default_background)
 
-    dpg.bind_theme(disabled_theme)
+    Theme.DEFAULT = default
+    Theme.LIGHT = create_theme_imgui_light()
+
+    dpg.bind_theme(default)
 
 
 def _header() -> None:
