@@ -1,14 +1,12 @@
 from enum import Enum, auto, unique
-from pathlib import Path
 from typing import Callable, Final, Iterable, Union, cast
 
 import dearpygui.dearpygui as dpg
 from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.can_bus import PayloadBuffer
+from can_explorer.resources import DIR_PATH as RESOURCES_DIR
 from can_explorer.resources import Percentage
-
-RESOURCES_DIR = Path(__file__).parent / "resources"
 
 
 class Default:
