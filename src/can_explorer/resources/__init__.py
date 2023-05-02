@@ -1,3 +1,30 @@
+import pathlib
+import uuid
+from typing import Any
+
+DIR_PATH = pathlib.Path(__file__).parent
+
+
+def frozen(value: Any) -> property:
+    """
+    Helper function to create an inline property.
+
+    Args:
+        value (Any)
+
+    Returns:
+        property
+    """
+    return property(fget=lambda _: value)
+
+
+def generate_tag() -> int:
+    """
+    Generate a random, unique tag.
+    """
+    return hash(uuid.uuid4())
+
+
 class Percentage:
     @staticmethod
     def get(n1: float, n2: float) -> int:

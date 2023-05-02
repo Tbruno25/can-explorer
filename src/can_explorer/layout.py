@@ -1,14 +1,12 @@
 from enum import Enum, auto, unique
-from pathlib import Path
 from typing import Callable, Final, Iterable, Union, cast
 
 import dearpygui.dearpygui as dpg
 from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.can_bus import PayloadBuffer
+from can_explorer.resources import DIR_PATH as RESOURCES_DIR
 from can_explorer.resources import Percentage
-
-RESOURCES_DIR = Path(__file__).parent / "resources"
 
 
 class Default:
@@ -38,8 +36,6 @@ class Tag(str, Enum):
     FOOTER = auto()
     MAIN_BUTTON = auto()
     CLEAR_BUTTON = auto()
-    PLOT_LABEL = auto()
-    PLOT_ITEM = auto()
     TAB_VIEWER = auto()
     TAB_SETTINGS = auto()
     SETTINGS_PLOT_BUFFER = auto()
@@ -101,16 +97,16 @@ def _init_fonts():
 def _init_themes():
     global Theme
 
-    Theme.DEFAULT = 0
-    Theme.LIGHT = create_theme_imgui_light()
-
     default_background = (50, 50, 50, 255)
-    with dpg.theme() as disabled_theme:
+    with dpg.theme() as default:
         with dpg.theme_component(dpg.mvButton, enabled_state=False):
             dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, default_background)
             dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, default_background)
 
-    dpg.bind_theme(disabled_theme)
+    Theme.DEFAULT = default
+    Theme.LIGHT = create_theme_imgui_light()
+
+    dpg.bind_theme(default)
 
 
 def _header() -> None:

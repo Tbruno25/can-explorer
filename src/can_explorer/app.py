@@ -64,7 +64,7 @@ class MainApp:
                         self.repopulate()
                         break
                     else:
-                        self.plot_manager.update(can_id, self.can_recorder[can_id])
+                        self.plot_manager.update(can_id)
             self._cancel.clear()
 
         return threading.Thread(target=loop, daemon=True)
@@ -89,6 +89,7 @@ class MainApp:
         """
         Stop the app loop.
         """
+        self.can_recorder.stop()
         self._cancel.set()
         self._worker.join()
 
