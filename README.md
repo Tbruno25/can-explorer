@@ -11,17 +11,17 @@
   <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=bug&template=01_BUG_REPORT.md&title=bug%3A+">Report a Bug</a>
   ·
   <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=enhancement&template=02_FEATURE_REQUEST.md&title=feature%3A+">Request a Feature</a>
-  .
+  ·
   <a href="https://github.com/tbruno25/can-explorer/issues/new?assignees=&labels=question&template=04_SUPPORT_QUESTION.md&title=support%3A+">Ask a Question</a>
 </div>
 
 <div align="center">
-<br />
+<br/>
 
 
 [![PyPI version](https://img.shields.io/pypi/v/can-explorer?color=mediumseagreen)](https://pypi.org/project/can-explorer/)
-![Python Versions](https://img.shields.io/pypi/pyversions/can-explorer?color=mediumseagreen)
-
+[![Python Versions](https://img.shields.io/pypi/pyversions/can-explorer?color=mediumseagreen)](https://pypi.org/project/can-explorer/)
+[![Stars](https://img.shields.io/github/stars/tbruno25/can-explorer?color=mediumseagreen)](https://github.com/Tbruno25/can-explorer/stargazers)
 </div>
 
 ---
@@ -35,7 +35,7 @@
 ### How does this help me?
 By continuously plotting all payloads for each CAN id, spotting trends that correspond to a specific action can become signicantly easier to identify. 
 
-Please refer to this [prior article](https://tbruno25.medium.com/car-hacking-faster-reverse-engineering-using-canopy-be1955843d57) I wrote for a working example of how this approach can be used to find which id includes speedmoter data.
+Please refer to this [prior article](https://tbruno25.medium.com/car-hacking-faster-reverse-engineering-using-canopy-be1955843d57) I wrote for a working example of how this approach can be used to find which id includes speedometer data.
 
 
 ### Built With
