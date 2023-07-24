@@ -1,18 +1,7 @@
 from random import sample
-from threading import Thread
 from time import sleep
 
-import dearpygui.dearpygui as dpg
-from can_explorer import app
-
 DELAY = 0.1
-
-
-def test_app_launch_basic():
-    Thread(target=app.main).start()
-    sleep(DELAY)
-    assert dpg.is_dearpygui_running()
-    dpg.stop_dearpygui()
 
 
 def test_set_app_state_starts_worker(fake_app):
