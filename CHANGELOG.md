@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ---
+## [0.1.6] - 2023-08-02
+
+### Fixed
+
+- Re-release with `ic_sim.log` included
+
+---
 ## [0.1.5] - 2023-07-31
 
 ### Added
