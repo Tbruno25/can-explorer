@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ---
+## [0.1.5] - 2023-07-31
+
+### Added
+
+- `--demo` command line flag
+- Gui functional test and resources
+
+---
 ## [0.1.4] - 2023-05-02
 
 ### Fixed
