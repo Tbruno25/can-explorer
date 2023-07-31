@@ -65,8 +65,13 @@ can-explorer
 python3 -m can_explorer
 ``` 
 
-Before starting the viewer, you ***must*** navigate to the settings tab and input your adapter configuration to create a bus instance. Please refer to the [python-can docs](https://python-can.readthedocs.io/en/stable/index.html) for more information regarding the various interfaces supported. 
+Before starting the viewer, you ***must*** navigate to the settings tab and input your interface adapter configuration to create a bus instance. Please refer to the [python-can docs](https://python-can.readthedocs.io/en/stable/index.html) for more information regarding the various interfaces supported. 
 
+The gui can also be launched with a demo flag which will auto select the virtual interface option and start streaming simulated CAN data in a background process.
+
+```sh 
+can-explorer --demo
+``` 
 
 ## Support
 

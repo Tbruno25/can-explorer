@@ -1,8 +1,9 @@
 import enum
 import threading
-from typing import Optional
+from typing import Callable, Optional
 
 import can
+import can.player
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus, layout, plotting
@@ -142,7 +143,7 @@ def settings_can_id_format_callback(sender, app_data, user_data) -> None:
     app.repopulate()
 
 
-def main():
+def main(test_config: Optional[Callable] = None):
     dpg.create_context()
 
     with dpg.window() as app_main:
@@ -168,6 +169,10 @@ def main():
 
     dpg.show_viewport()
     dpg.set_primary_window(app_main, True)
+
+    if test_config:
+        test_config()
+
     dpg.start_dearpygui()
     dpg.destroy_context()
 
