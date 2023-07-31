@@ -347,9 +347,13 @@ def set_settings_can_id_format_callback(callback: Callable) -> None:
     dpg.configure_item(Tag.SETTINGS_ID_FORMAT, callback=callback)
 
 
-def set_settings_interface_options(iterable: Iterable[str]) -> None:
-    dpg.configure_item(Tag.SETTINGS_INTERFACE, items=iterable)
+def set_settings_interface_options(iterable: Iterable[str], default: str = "") -> None:
+    dpg.configure_item(Tag.SETTINGS_INTERFACE, items=iterable, default_value=default)
 
 
-def set_settings_baudrate_options(iterable: Iterable[str]) -> None:
-    dpg.configure_item(Tag.SETTINGS_BAUDRATE, items=iterable)
+def set_settings_channel_options(default: str = "") -> None:
+    dpg.configure_item(Tag.SETTINGS_CHANNEL, default_value=default)
+
+
+def set_settings_baudrate_options(iterable: Iterable[str], default: str = "") -> None:
+    dpg.configure_item(Tag.SETTINGS_BAUDRATE, items=iterable, default_value=default)

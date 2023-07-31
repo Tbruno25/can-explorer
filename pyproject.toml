@@ -31,4 +31,4 @@ build-backend = "poetry.core.masonry.api"
 ignore_missing_imports = true
 
 [tool.poetry.scripts]
-can-explorer = "can_explorer.app:main"
+can-explorer = "can_explorer.__main__:__main__"
