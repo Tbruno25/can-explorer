@@ -1,3 +1,4 @@
+import platform
 from enum import Enum, auto, unique
 from typing import Callable, Final, Iterable, Union, cast
 
@@ -8,6 +9,8 @@ from can_explorer.can_bus import PayloadBuffer
 from can_explorer.resources import DIR_PATH as RESOURCES_DIR
 from can_explorer.resources import Percentage
 
+HOST_OS = platform.system()
+
 
 class Default:
     WIDTH: Final = 600
@@ -17,6 +20,7 @@ class Default:
     BUFFER_SIZE: Final = 100
     ID_FORMAT: Final = hex
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
+    FOOTER_OFFSET: Final = 50 if HOST_OS == "Linux" else 85
 
 
 class Font:
@@ -173,7 +177,7 @@ def _footer() -> None:
         dpg.add_spacer(height=2)
 
         dpg.add_separator()
-        dpg.add_spacer()
+        dpg.add_spacer(height=2)
         with dpg.group(horizontal=True):
             dpg.add_button(
                 tag=Tag.MAIN_BUTTON,
@@ -240,7 +244,12 @@ def create() -> None:
 
 def resize() -> None:
     dpg.set_item_height(
-        Tag.BODY, (dpg.get_viewport_height() - dpg.get_item_height(Tag.FOOTER) - 50)
+        Tag.BODY,
+        (
+            dpg.get_viewport_height()
+            - dpg.get_item_height(Tag.FOOTER)
+            - Default.FOOTER_OFFSET
+        ),
     )
     dpg.set_item_width(Tag.SETTINGS_APPLY, dpg.get_viewport_width() // 4)
 
