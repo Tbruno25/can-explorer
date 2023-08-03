@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "can-explorer"
-version = "0.1.6"
+version = "0.1.7"
 description = "Visualize CAN bus payloads in real time"
 license = "GPL-3.0-or-later"
 authors = ["TJ <tbruno25@gmail.com>"]
