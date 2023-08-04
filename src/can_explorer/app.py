@@ -160,9 +160,7 @@ def main(test_config: Optional[Callable] = None):
     layout.set_plot_buffer_slider_callback(plot_buffer_slider_callback)
     layout.set_plot_height_slider_callback(plot_height_slider_callback)
 
-    dpg.create_viewport(
-        title="CAN Explorer", width=Default.WIDTH, height=Default.HEIGHT
-    )
+    dpg.create_viewport(title=Default.TITLE, width=Default.WIDTH, height=Default.HEIGHT)
     dpg.set_viewport_resize_callback(layout.resize)
     dpg.setup_dearpygui()
     layout.resize()
