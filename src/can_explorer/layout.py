@@ -1,4 +1,3 @@
-import platform
 from enum import Enum, auto, unique
 from typing import Callable, Final, Iterable, Union, cast
 
@@ -7,9 +6,7 @@ from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.can_bus import PayloadBuffer
 from can_explorer.resources import DIR_PATH as RESOURCES_DIR
-from can_explorer.resources import Percentage
-
-HOST_OS = platform.system()
+from can_explorer.resources import HOST_OS, Percentage
 
 
 class Default:
@@ -19,8 +16,9 @@ class Default:
     PLOT_HEIGHT: Final = 100
     BUFFER_SIZE: Final = 100
     ID_FORMAT: Final = hex
+    TITLE: Final = "CAN Explorer"
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
-    FOOTER_OFFSET: Final = 50 if HOST_OS == "Linux" else 85
+    FOOTER_OFFSET: Final = 50 if HOST_OS == "linux" else 85
 
 
 class Font:

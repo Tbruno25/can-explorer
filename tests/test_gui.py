@@ -1,6 +1,5 @@
 import multiprocessing as mp
 import os
-import platform
 import sys
 from functools import partial
 from pathlib import Path
@@ -9,47 +8,71 @@ from time import sleep
 import can_explorer.app
 import pyautogui
 import pytest
-import Xlib.display
+from can_explorer.resources import HOST_OS
 from can_explorer.resources.demo import demo_config
-from pyvirtualdisplay.smartdisplay import SmartDisplay
 
+from tests.resources import WITHIN_CI
 from tests.resources.gui_components import Gui
 
-pytestmark = pytest.mark.skipif(
-    platform.system() != "Linux", reason="Only compatible with linux hosts"
-)
+if HOST_OS == "linux":
+    import Xlib.display
+    from pyvirtualdisplay.smartdisplay import SmartDisplay
 
-IN_CI = os.getenv("GITHUB_ACTIONS")
-
-VISIBLE = True
-XAUTH = True
+elif HOST_OS == "windows":
+    import pygetwindow
 
 pyautogui.locate = partial(pyautogui.locateCenterOnScreen, grayscale=True)
 
 
-def save_screenshot(display, request, path: Path = Path("screenshots")) -> None:
+def save_screenshot(request, path: Path = Path("screenshots")) -> None:
     name = request.node.name
     major, minor, micro, *_ = sys.version_info
-    screenshot = display.waitgrab()
-    screenshot.save(str(path / f"{major}-{minor}-{micro}_{name}.png"))
+    screenshot = pyautogui.screenshot()
+    screenshot.save(str(path / f"{HOST_OS}_{major}-{minor}-{micro}_{name}.png"))
 
 
 @pytest.fixture
-def virtual_gui(request):
-    with SmartDisplay(visible=VISIBLE, use_xauth=XAUTH) as display:
-        # Attach pyautogui to the virtual display
-        pyautogui._pyautogui_x11._display = Xlib.display.Display(os.getenv("DISPLAY"))
+def virtual_display():
+    if HOST_OS == "windows":
+        # Virtual display not needed
+        yield
 
-        proc = mp.Process(target=can_explorer.app.main, args=(demo_config,))
-        proc.start()
-        sleep(0.5)
+    else:
+        display = SmartDisplay(visible=True, use_xauth=True)
+        display.start()
 
         yield
 
-        if IN_CI:
-            save_screenshot(display, request)
+        display.stop()
 
-        proc.kill()
+
+@pytest.fixture
+def gui_process(virtual_display):
+    proc = mp.Process(target=can_explorer.app.main, args=(demo_config,))
+    proc.start()
+    sleep(1)
+
+    yield
+
+    proc.kill()
+
+
+@pytest.fixture
+def virtual_gui(request, gui_process):
+    if HOST_OS == "windows":
+        # Ensure window is active
+        app_title = can_explorer.app.Default.TITLE
+        app_window = pygetwindow.getWindowsWithTitle(app_title)[0]
+        app_window.restore()
+
+    else:
+        # Attach pyautogui to the virtual display
+        pyautogui._pyautogui_x11._display = Xlib.display.Display(os.getenv("DISPLAY"))
+
+    yield
+
+    if WITHIN_CI:
+        save_screenshot(request)
 
 
 """

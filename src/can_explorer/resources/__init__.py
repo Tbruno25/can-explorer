@@ -1,8 +1,11 @@
 import pathlib
+import platform
 import uuid
-from typing import Any
+from typing import Any, Final
 
-DIR_PATH = pathlib.Path(__file__).parent
+DIR_PATH: Final = pathlib.Path(__file__).parent
+
+HOST_OS: Final = platform.system().lower()
 
 
 def frozen(value: Any) -> property:
