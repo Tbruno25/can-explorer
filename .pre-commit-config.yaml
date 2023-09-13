@@ -1,15 +1,16 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 23.3.0
+    rev: 23.9.1
     hooks:
       - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.2.0
+    rev: v1.5.1
     hooks:
     - id: mypy
       stages: [pre-merge-commit, pre-push, manual]
+      exclude: ^tests/
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.261
+    rev: v0.0.289
     hooks:
       - id: ruff
         args:
@@ -18,4 +19,3 @@ repos:
           # Rules E & F applied by default
           # https://github.com/charliermarsh/ruff/blob/main/README.md#supported-rules
           - --extend-select=A,B,I,N,W
-          - --ignore=E501
