@@ -58,9 +58,8 @@ class MainApp:
 
         def loop():
             while not self._cancel.wait(self._rate):
-                for can_id in tuple(
-                    self.can_recorder  # Note: must convert can_recorder to avoid runtime error
-                ):
+                # Note: must convert can_recorder to avoid runtime error
+                for can_id in tuple(self.can_recorder):
                     if can_id not in self.plot_manager():
                         self.repopulate()
                         break

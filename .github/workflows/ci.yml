@@ -9,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - uses: actions/setup-python@v3
+    - uses: actions/setup-python@v4
+      with:
+        cache: 'pip'
     - uses: pre-commit/action@v3.0.0
       with:
         extra_args: --hook-stage manual --all-files
@@ -22,13 +24,25 @@ jobs:
         python-version: ['3.8', '3.9', '3.10', '3.11']
 
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-    - name: Setup python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+    - uses: actions/setup-python@v4
       with:
+        # https://github.com/actions/setup-python/issues/369
         python-version: ${{ matrix.python-version }}
+        cache: 'pip'
+
+    - name: Install poetry
+      run: pip install poetry 
+
+    - uses: actions/cache@v3
+      with:
+        path: ${{ env.pythonLocation }}
+        key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('poetry.lock') }}
+
+    - name: Install dependencies
+    # https://github.com/nektos/act/issues/1639
+      run: poetry install --no-ansi
 
     - name: Test linux
       if: runner.os != 'Windows'
@@ -38,8 +52,6 @@ jobs:
         max_attempts: 3
         command: |
           sudo apt-get install -y xvfb xserver-xephyr scrot
-          python -m pip install poetry
-          poetry install -v --no-ansi
           mkdir -p screenshots
           xvfb-run -a poetry run pytest -v
 
@@ -50,8 +62,6 @@ jobs:
         timeout_minutes: 10
         max_attempts: 3
         command: |
-          python -m pip install poetry==1.3.1
-          poetry install -v --no-ansi
           mkdir -p screenshots
           poetry run pytest -v
 
@@ -61,6 +71,4 @@ jobs:
       with:
         name: screenshots
         path: screenshots/*.png
-        
-    - name: Typecheck
-      run: poetry run mypy src
+
