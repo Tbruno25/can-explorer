@@ -1,17 +1,16 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 23.9.1
-    hooks:
-      - id: black
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.5.1
+    rev: v1.6.1
     hooks:
     - id: mypy
       stages: [pre-merge-commit, pre-push, manual]
       exclude: ^tests/
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.289
+    rev: v0.1.3
     hooks:
+      # Run the Ruff formatter
+      - id: ruff-format
+      # Run the Ruff linter
       - id: ruff
         args:
           - --fix
