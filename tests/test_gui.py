@@ -18,6 +18,9 @@ if HOST_OS == "linux":
     import Xlib.display
     from pyvirtualdisplay.smartdisplay import SmartDisplay
 
+elif HOST_OS == "darwin":
+    from pyvirtualdisplay.smartdisplay import SmartDisplay
+
 elif HOST_OS == "windows":
     import pygetwindow
 
@@ -65,7 +68,7 @@ def virtual_gui(request, gui_process):
         app_window = pygetwindow.getWindowsWithTitle(app_title)[0]
         app_window.restore()
 
-    else:
+    elif HOST_OS == "linux":
         # Attach pyautogui to the virtual display
         pyautogui._pyautogui_x11._display = Xlib.display.Display(os.getenv("DISPLAY"))
 
