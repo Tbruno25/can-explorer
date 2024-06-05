@@ -51,7 +51,7 @@ jobs:
         timeout_minutes: 10
         max_attempts: 3
         command: |
-          sudo apt-get install -y xvfb xserver-xephyr scrot
+          sudo apt-get install -y xvfb xserver-xephyr scrot gnome-screenshot
           mkdir -p screenshots
           xvfb-run -a poetry run pytest -v
 
