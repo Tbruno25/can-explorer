@@ -22,8 +22,12 @@ mypy = "^1.2.0"
 pillow = "^10.3.0"
 pyautogui = "^0.9.54"
 opencv-python = "^4.8.0.74"
-pyvirtualdisplay = {version = "^3.0", platform = "linux"}
+pyvirtualdisplay = [
+    {version = "^3.0", platform = "linux"},
+    {version = "^3.0", platform = "darwin"},
+]
 msvc-runtime = {version = "^14.34.31931", platform = "windows"}
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

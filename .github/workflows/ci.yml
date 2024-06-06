@@ -20,8 +20,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        # Temporarily limit versions
+        # https://github.com/python-poetry/poetry/issues/8139
+        python-version: ['3.10', '3.11', '3.12'] # '3.8', '3.9', 
 
     steps:
     - uses: actions/checkout@v3
@@ -45,7 +47,7 @@ jobs:
       run: poetry install --no-ansi
 
     - name: Test linux
-      if: runner.os != 'Windows'
+      if: runner.os == 'Linux'
       uses: nick-fields/retry@v2
       with:
         timeout_minutes: 10
@@ -65,10 +67,38 @@ jobs:
           mkdir -p screenshots
           poetry run pytest -v
 
+    - name: Test mac [1]
+      if: runner.os == 'macOS'
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        # Xvfb not available until next job
+        command: |
+          brew install --cask xquartz
+          echo "/opt/X11/bin" >> $GITHUB_PATH
+
+    - name: Test mac [2]
+      if: runner.os == 'macOS'
+      uses: nick-fields/retry@v2
+      with:
+        timeout_minutes: 10
+        max_attempts: 3
+        command: |
+          mkdir -p screenshots
+          Xvfb :1 & 
+          export DISPLAY=":1"
+          poetry run pytest -v
+
     - name: Upload screenshots
       uses: actions/upload-artifact@v3
       if: always()
       with:
         name: screenshots
         path: screenshots/*.png
+
+    - name: Setup tmate session
+      # Enables ssh session during manually triggered ci runs
+      uses: mxschmitt/action-tmate@v3
+      if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
 
