@@ -1,18 +1,51 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  - workflow_dispatch
+  # push:
+  #   tags:
+  #     - "v*.*.*"
       
 jobs:
+  # pypi:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Build and publish to pypi
+  #       uses: JRubics/poetry-publish@v1.16
+  #       with:
+  #         pypi_token: ${{ secrets.PYPI_TOKEN }}
+  #         ignore_dev_requirements: "yes"
+
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+
     steps:
       - uses: actions/checkout@v4
-      - name: Build and publish to pypi
-        uses: JRubics/poetry-publish@v1.16
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          pypi_token: ${{ secrets.PYPI_TOKEN }}
-          ignore_dev_requirements: "yes"
-          
+          cache: 'pip'
+
+      - name: Install Dependencies
+        run: pip install .
+
+      - name: Build Executable
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: src/can_explorer
+          onefile: true
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner.os }} Build
+          path: |
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
