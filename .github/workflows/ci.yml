@@ -8,11 +8,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         cache: 'pip'
-    - uses: pre-commit/action@v3.0.0
+    - uses: pre-commit/action@v3.0.1
       with:
         extra_args: --hook-stage manual --all-files
 
@@ -26,9 +26,9 @@ jobs:
         python-version: ['3.10', '3.11', '3.12'] # '3.8', '3.9', 
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
         # https://github.com/actions/setup-python/issues/369
         python-version: ${{ matrix.python-version }}
@@ -37,7 +37,7 @@ jobs:
     - name: Install poetry
       run: pip install poetry 
 
-    - uses: actions/cache@v3
+    - uses: actions/cache@v4
       with:
         path: ${{ env.pythonLocation }}
         key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('poetry.lock') }}
@@ -91,7 +91,7 @@ jobs:
           poetry run pytest -v
 
     - name: Upload screenshots
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: screenshots
