@@ -18,8 +18,8 @@ class State(enum.Flag):
 class MainApp:
     _rate = 0.05
     _cancel = threading.Event()
+    _state = State.STOPPED
     _worker: threading.Thread
-    _state: State
 
     bus: Optional[can.bus.BusABC] = None
     can_recorder = can_bus.Recorder()
@@ -29,16 +29,21 @@ class MainApp:
     def is_active(self) -> bool:
         return bool(self._state)
 
-    def set_state(self, state: bool) -> None:
+    @property
+    def state(self) -> State:
+        return self._state
+
+    def set_state(self, state: State) -> None:
         """
         Automatically start or stop the app based on state.
 
         Args:
-            state (bool)
+            state (State)
         """
-        self._state = State(state)
 
-        self.start() if self._state else self.stop()
+        self.start() if state else self.stop()
+
+        self._state = state
 
     def repopulate(self) -> None:
         """
@@ -56,7 +61,7 @@ class MainApp:
             threading.Thread: Worker
         """
 
-        def loop():
+        def loop() -> None:
             while not self._cancel.wait(self._rate):
                 # Note: must convert can_recorder to avoid runtime error
                 for can_id in tuple(self.can_recorder):
@@ -69,7 +74,7 @@ class MainApp:
 
         return threading.Thread(target=loop, daemon=True)
 
-    def start(self):
+    def start(self) -> None:
         """
         Initialize and start app loop.
 
@@ -85,7 +90,7 @@ class MainApp:
         self._worker = self._get_worker()
         self._worker.start()
 
-    def stop(self):
+    def stop(self) -> None:
         """
         Stop the app loop.
         """
@@ -105,7 +110,8 @@ app = MainApp()
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
     try:
-        app.set_state(layout.get_main_button_state())
+        app.set_state(State(not app.state))
+        layout.set_main_button_label(app.state)
     except Exception as e:
         layout.popup_error(name=type(e).__name__, info=e)
 
@@ -153,6 +159,7 @@ def main(test_config: Optional[Callable] = None):
     layout.set_settings_apply_button_callback(settings_apply_button_callback)
     layout.set_settings_can_id_format_callback(settings_can_id_format_callback)
 
+    layout.set_main_button_label(app.state)
     layout.set_main_button_callback(start_stop_button_callback)
     layout.set_clear_button_callback(clear_button_callback)
 

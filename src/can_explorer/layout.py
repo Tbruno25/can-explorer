@@ -1,4 +1,4 @@
-from enum import Enum, auto, unique
+from enum import Enum, Flag, auto, unique
 from typing import Callable, Final, Iterable, Union, cast
 
 import dearpygui.dearpygui as dpg
@@ -179,10 +179,8 @@ def _footer() -> None:
         with dpg.group(horizontal=True):
             dpg.add_button(
                 tag=Tag.MAIN_BUTTON,
-                label="Start",
                 width=-100,
                 height=50,
-                user_data=False,
             )
             dpg.add_button(
                 tag=Tag.CLEAR_BUTTON,
@@ -284,10 +282,6 @@ def popup_error(name: Union[str, Exception], info: Union[str, Exception]) -> Non
     )
 
 
-def get_main_button_state() -> bool:
-    return dpg.get_item_user_data(Tag.MAIN_BUTTON)
-
-
 def get_settings_plot_buffer() -> int:
     max_value = PayloadBuffer.MAX
     percentage = dpg.get_value(Tag.SETTINGS_PLOT_BUFFER)
@@ -318,20 +312,13 @@ def get_settings_id_format() -> Callable:
     )
 
 
+def set_main_button_label(state: Flag) -> None:
+    labels = ("Stop", "Start")
+    dpg.set_item_label(Tag.MAIN_BUTTON, labels[not state])
+
+
 def set_main_button_callback(callback: Callable) -> None:
-    button_labels = ("Stop", "Start")
-
-    def wrapped_callback(sender, app_data, user_data):
-        """
-        Set the button label and toggle the state.
-        """
-        dpg.configure_item(
-            Tag.MAIN_BUTTON, label=button_labels[user_data], user_data=not user_data
-        )
-
-        return callback(sender, app_data, user_data)
-
-    dpg.configure_item(Tag.MAIN_BUTTON, callback=wrapped_callback)
+    dpg.configure_item(Tag.MAIN_BUTTON, callback=callback)
 
 
 def set_clear_button_callback(callback: Callable) -> None:
