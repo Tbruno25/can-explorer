@@ -82,7 +82,7 @@ class MainApp:
             Exception: If CAN bus does not exist.
         """
         if self.bus is None:
-            raise Exception("ERROR: Must apply settings before starting")
+            raise RuntimeError("Must apply settings before starting")
 
         self.can_recorder.set_bus(self.bus)
         self.can_recorder.start()
@@ -136,6 +136,8 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
     )
 
     try:
+        if app.is_active:
+            raise RuntimeError("App must be stopped before applying new settings")
         bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
         app.set_bus(bus)
 
