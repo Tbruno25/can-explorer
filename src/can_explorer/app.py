@@ -1,4 +1,6 @@
 import enum
+import logging
+import sys
 import threading
 from typing import Callable, Optional
 
@@ -26,24 +28,11 @@ class MainApp:
     plot_manager = plotting.PlotManager()
 
     @property
-    def is_active(self) -> bool:
-        return bool(self._state)
-
-    @property
     def state(self) -> State:
         return self._state
 
-    def set_state(self, state: State) -> None:
-        """
-        Automatically start or stop the app based on state.
-
-        Args:
-            state (State)
-        """
-
-        self.start() if state else self.stop()
-
-        self._state = state
+    def is_active(self) -> bool:
+        return bool(self._state)
 
     def repopulate(self) -> None:
         """
@@ -90,6 +79,8 @@ class MainApp:
         self._worker = self._get_worker()
         self._worker.start()
 
+        self._state = State.ACTIVE
+
     def stop(self) -> None:
         """
         Stop the app loop.
@@ -97,6 +88,8 @@ class MainApp:
         self.can_recorder.stop()
         self._cancel.set()
         self._worker.join()
+
+        self._state = State.STOPPED
 
     def set_bus(self, bus: can.BusABC) -> None:
         """
@@ -109,11 +102,8 @@ app = MainApp()
 
 
 def start_stop_button_callback(sender, app_data, user_data) -> None:
-    try:
-        app.set_state(State(not app.state))
-        layout.set_main_button_label(app.state)
-    except Exception as e:
-        layout.popup_error(name=type(e).__name__, info=e)
+    app.stop() if app.is_active() else app.start()
+    layout.set_main_button_label(app.state)
 
 
 def clear_button_callback(sender, app_data, user_data) -> None:
@@ -134,15 +124,10 @@ def settings_apply_button_callback(sender, app_data, user_data) -> None:
         channel=layout.get_settings_channel(),
         bitrate=layout.get_settings_baudrate(),
     )
-
-    try:
-        if app.is_active:
-            raise RuntimeError("App must be stopped before applying new settings")
-        bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
-        app.set_bus(bus)
-
-    except Exception as e:
-        layout.popup_error(name=type(e).__name__, info=e)
+    if app.is_active():
+        raise RuntimeError("App must be stopped before applying new settings")
+    bus = can.Bus(**{k: v for k, v in user_settings.items() if v})  # type: ignore
+    app.set_bus(bus)
 
 
 def settings_can_id_format_callback(sender, app_data, user_data) -> None:
@@ -150,7 +135,7 @@ def settings_can_id_format_callback(sender, app_data, user_data) -> None:
     app.repopulate()
 
 
-def main(test_config: Optional[Callable] = None):
+def setup():
     dpg.create_context()
 
     with dpg.window() as app_main:
@@ -173,14 +158,29 @@ def main(test_config: Optional[Callable] = None):
     dpg.setup_dearpygui()
     layout.resize()
 
-    dpg.show_viewport()
     dpg.set_primary_window(app_main, True)
+
+
+def teardown():
+    dpg.destroy_context()
+
+
+def exception_handler(exc_type, exc_value, exc_traceback):
+    logging.debug(msg="ExceptionHandler", exc_info=(exc_type, exc_value, exc_traceback))
+    layout.popup_error(name=exc_type.__name__, info=exc_value)
+
+
+def main(test_config: Optional[Callable] = None):
+    setup()
 
     if test_config:
         test_config()
 
+    sys.excepthook = exception_handler
+    dpg.show_viewport()
     dpg.start_dearpygui()
-    dpg.destroy_context()
+
+    teardown()
 
 
 if __name__ == "__main__":
