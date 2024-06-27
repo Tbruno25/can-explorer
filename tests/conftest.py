@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 
+import can_explorer
 import pytest
-from can_explorer import app, can_bus, plotting
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def mock_notifier():
 
 @pytest.fixture
 def fake_recorder(mock_listener, mock_notifier):
-    recorder = can_bus.Recorder()
+    recorder = can_explorer.can_bus.Recorder()
 
     with patch("can_explorer.can_bus.Recorder") as mock:
         mock.return_value = recorder
@@ -35,7 +35,7 @@ def fake_recorder(mock_listener, mock_notifier):
 @pytest.fixture
 def fake_manager():
     with patch("can_explorer.plotting.Row"):
-        manager = plotting.PlotManager()
+        manager = can_explorer.plotting.PlotManager()
 
         with patch("can_explorer.plotting.PlotManager") as mock:
             mock.return_value = manager
@@ -45,8 +45,13 @@ def fake_manager():
 
 @pytest.fixture
 def fake_app(fake_manager, fake_recorder):
-    main_app = app.MainApp()
+    main_app = can_explorer.app.MainApp()
     main_app.plot_manager = fake_manager
     main_app.can_recorder = fake_recorder
     main_app.set_bus(Mock())
     yield main_app
+
+
+@pytest.fixture
+def app():
+    yield can_explorer.app.MainApp()
