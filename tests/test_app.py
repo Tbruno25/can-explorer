@@ -1,6 +1,8 @@
 from random import sample
 from time import sleep
 
+import pytest
+
 DELAY = 0.1
 
 
@@ -29,3 +31,12 @@ def test_app_populates_data_in_ascending_order(fake_app, fake_manager, fake_reco
     sorted_keys = list(fake_manager.row.keys())
 
     assert sorted_data == sorted_keys
+
+
+def test_gui_must_apply_settings_before_running(app):
+    with pytest.raises(RuntimeError):
+        app.start()
+
+
+def test_gui_must_be_inactive_to_apply_settings(app):
+    pass  # Todo
