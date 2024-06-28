@@ -54,4 +54,6 @@ def fake_app(fake_manager, fake_recorder):
 
 @pytest.fixture
 def app():
-    yield can_explorer.app.MainApp()
+    can_explorer.app.setup()
+    yield can_explorer.app.app
+    can_explorer.app.teardown()

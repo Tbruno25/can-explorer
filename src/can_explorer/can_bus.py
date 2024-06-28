@@ -48,12 +48,11 @@ class Recorder(defaultdict):
     def __init__(self):
         super().__init__(PayloadBuffer)
 
-    @property
     def is_active(self) -> bool:
         return self._active
 
     def start(self) -> None:
-        if self.is_active:
+        if self.is_active():
             return
 
         self._listener = _Listener(self)
@@ -61,7 +60,7 @@ class Recorder(defaultdict):
         self._active = True
 
     def stop(self) -> None:
-        if not self.is_active:
+        if not self.is_active():
             return
 
         self._notifier.stop()  # type: ignore [union-attr]
