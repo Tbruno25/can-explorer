@@ -5,9 +5,9 @@ from functools import partial
 from pathlib import Path
 from time import sleep
 
-import can_explorer.app
 import pyautogui
 import pytest
+from can_explorer import AppController, AppView, PlotModel, config
 from can_explorer.resources import HOST_OS
 from can_explorer.resources.demo import demo_config
 
@@ -50,8 +50,9 @@ def virtual_display():
 
 
 @pytest.fixture
-def gui_process(virtual_display):
-    proc = mp.Process(target=can_explorer.app.main, args=(demo_config,))
+def process(virtual_display):
+    controller = AppController(PlotModel(), AppView())
+    proc = mp.Process(target=controller.run, args=(demo_config,))
     proc.start()
     sleep(1)
 
@@ -61,10 +62,10 @@ def gui_process(virtual_display):
 
 
 @pytest.fixture
-def virtual_gui(request, gui_process):
+def virtual_gui(request, process):
     if HOST_OS == "windows":
         # Ensure window is active
-        app_title = can_explorer.app.Default.TITLE
+        app_title = config.Default.TITLE
         app_window = pygetwindow.getWindowsWithTitle(app_title)[0]
         app_window.restore()
 

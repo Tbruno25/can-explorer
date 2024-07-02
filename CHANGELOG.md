@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Re-implemented using MVC design pattern
+
 ### Added
 
 - Prevent applying settings while active
+
+### Fixed
+
+- Removed global variables
 
 ---
 ## [0.1.8] - 2024-06-26

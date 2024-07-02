@@ -8,6 +8,8 @@ from can.interfaces import VALID_INTERFACES
 from can.listener import Listener
 from can.notifier import Notifier
 
+from can_explorer.config import Default
+
 INTERFACES: Final = sorted(list(VALID_INTERFACES))
 
 _BAUDRATES = [33_333, 125_000, 250_000, 500_000, 1_000_000]
@@ -25,10 +27,9 @@ class _Listener(Listener):
 
 
 class PayloadBuffer(deque):
-    MIN = 50
-    MAX = 2500
-
     def __init__(self):
+        self.MIN = Default.BUFFER_MIN
+        self.MAX = Default.BUFFER_MAX
         super().__init__([0] * self.MAX, maxlen=self.MAX)
 
     def __getitem__(self, index) -> tuple:  # type: ignore [override]
@@ -54,6 +55,9 @@ class Recorder(defaultdict):
     def start(self) -> None:
         if self.is_active():
             return
+
+        if self._bus is None:
+            raise Exception("Error: must set bus before starting.")
 
         self._listener = _Listener(self)
         self._notifier = Notifier(self._bus, [self._listener])

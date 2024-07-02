@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "can-explorer"
-version = "0.1.8"
+version = "0.1.9"
 description = "Visualize CAN bus payloads in real time"
 license = "GPL-3.0-or-later"
 authors = ["TJ <tbruno25@gmail.com>"]
@@ -35,6 +35,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.mypy]
 ignore_missing_imports = true
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
 
 [tool.poetry.scripts]
 can-explorer = "can_explorer.__main__:__main__"

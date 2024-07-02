@@ -1,59 +1,46 @@
-from unittest.mock import Mock, patch
+from unittest.mock import Mock
 
-import can_explorer
+import can
 import pytest
+from can_explorer.can_bus import Recorder
+from can_explorer.controller import AppController
+from can_explorer.model import PlotModel
+from can_explorer.view import AppView
 
 
 @pytest.fixture
-def mock_buffer():
-    with patch("can_explorer.can_bus.PayloadBuffer", autospec=True) as mock:
-        yield mock
+def vbus1():
+    yield can.interface.Bus(interface="virtual", channel="pytest")
 
 
 @pytest.fixture
-def mock_listener():
-    with patch("can_explorer.can_bus._Listener", autospec=True) as mock:
-        yield mock
+def vbus2():
+    yield can.interface.Bus(interface="virtual", channel="pytest")
 
 
 @pytest.fixture
-def mock_notifier():
-    with patch("can_explorer.can_bus.Notifier", autospec=True) as mock:
-        yield mock
+def recorder():
+    yield Recorder()
 
 
 @pytest.fixture
-def fake_recorder(mock_listener, mock_notifier):
-    recorder = can_explorer.can_bus.Recorder()
-
-    with patch("can_explorer.can_bus.Recorder") as mock:
-        mock.return_value = recorder
-
-        yield recorder
+def model():
+    yield PlotModel()
 
 
 @pytest.fixture
-def fake_manager():
-    with patch("can_explorer.plotting.Row"):
-        manager = can_explorer.plotting.PlotManager()
-
-        with patch("can_explorer.plotting.PlotManager") as mock:
-            mock.return_value = manager
-
-            yield manager
+def view():
+    yield AppView()
 
 
 @pytest.fixture
-def fake_app(fake_manager, fake_recorder):
-    main_app = can_explorer.app.MainApp()
-    main_app.plot_manager = fake_manager
-    main_app.can_recorder = fake_recorder
-    main_app.set_bus(Mock())
-    yield main_app
+def fake_controller(recorder, model):
+    yield AppController(model=model, recorder=recorder, bus=Mock(), view=Mock())
 
 
 @pytest.fixture
-def app():
-    can_explorer.app.setup()
-    yield can_explorer.app.app
-    can_explorer.app.teardown()
+def controller(model, view):
+    controller = AppController(model, view)
+    controller.setup()
+    yield controller
+    controller.teardown()
