@@ -78,21 +78,6 @@ def virtual_gui(request, gui_process):
         save_screenshot(request)
 
 
-"""
-@pytest.fixture
-def apply_settings():
-    pyautogui.click(pyautogui.locate(Gui.Tab.SETTINGS))
-    pyautogui.click(pyautogui.locate(Gui.Input.INTERFACE))
-    pyautogui.moveRel(0, 50)
-    pyautogui.scroll(-10)
-    pyautogui.click(pyautogui.locate(Gui.Input.VIRTUAL))
-    pyautogui.click(pyautogui.locate(Gui.Button.APPLY))
-    pyautogui.click(
-        pyautogui.locate(Gui.Tab.VIEWER), clicks=2, interval=1
-    )  # twice for reliability
-"""
-
-
 def test_gui_launch_basic(virtual_gui):
     pass  # Todo
 
