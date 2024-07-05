@@ -1,4 +1,4 @@
-from unittest.mock import Mock
+from unittest.mock import MagicMock
 
 import can
 import pytest
@@ -35,7 +35,9 @@ def view():
 
 @pytest.fixture
 def fake_controller(recorder, model):
-    yield AppController(model=model, recorder=recorder, bus=Mock(), view=Mock())
+    yield AppController(
+        model=model, recorder=recorder, bus=MagicMock(), view=MagicMock()
+    )
 
 
 @pytest.fixture

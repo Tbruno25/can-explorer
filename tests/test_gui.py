@@ -7,7 +7,7 @@ from time import sleep
 
 import pyautogui
 import pytest
-from can_explorer import AppController, AppView, PlotModel, config
+from can_explorer import AppController, AppView, PlotModel, configs
 from can_explorer.resources import HOST_OS
 from can_explorer.resources.demo import demo_config
 
@@ -65,7 +65,7 @@ def process(virtual_display):
 def virtual_gui(request, process):
     if HOST_OS == "windows":
         # Ensure window is active
-        app_title = config.Default.TITLE
+        app_title = configs.Default.TITLE
         app_window = pygetwindow.getWindowsWithTitle(app_title)[0]
         app_window.restore()
 

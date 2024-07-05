@@ -1,41 +1,46 @@
 from __future__ import annotations
 
-from typing import Callable, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 import dearpygui.dearpygui as dpg
 
-from can_explorer.config import Font
-from can_explorer.resources import generate_tag
-from can_explorer.view import PlotTable
+from can_explorer.configs import Default
+from can_explorer.tags import generate_tag
 
 
-class Config:
-    LABEL = dict(enabled=False)
+class LabelItem(str):
+    def __new__(cls) -> LabelItem:
+        label = dpg.add_button(
+            tag=str(generate_tag()),
+            enabled=False,
+        )
 
-    PLOT = dict(
-        no_title=True,
-        no_menus=True,
-        no_child=True,
-        no_mouse_pos=True,
-        no_highlight=True,
-        no_box_select=True,
-    )
-
-    X_AXIS = dict(axis=dpg.mvXAxis, lock_min=True, lock_max=True, no_tick_labels=True)
-
-    Y_AXIS = dict(axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True)
+        return super().__new__(cls, label)
 
 
-class Plot(str):
+class PlotItem(str):
     x_axis: str
     y_axis: str
     series: str
 
-    def __new__(cls, x: Iterable, y: Iterable) -> Plot:
-        with dpg.plot(tag=str(generate_tag()), **Config.PLOT) as plot:
+    def __new__(cls, x: Iterable, y: Iterable) -> PlotItem:
+        with dpg.plot(
+            tag=str(generate_tag()),
+            no_title=True,
+            no_menus=True,
+            no_child=True,
+            no_mouse_pos=True,
+            no_highlight=True,
+            no_box_select=True,
+        ) as plot:
             plot = super().__new__(cls, plot)
-            plot.x_axis = dpg.add_plot_axis(**Config.X_AXIS)
-            plot.y_axis = dpg.add_plot_axis(**Config.Y_AXIS)
+            plot.x_axis = dpg.add_plot_axis(
+                axis=dpg.mvXAxis, lock_min=True, lock_max=True, no_tick_labels=True
+            )
+            plot.y_axis = dpg.add_plot_axis(
+                axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True
+            )
             plot.series = dpg.add_line_series(parent=plot.y_axis, x=x, y=y)
 
         return plot
@@ -46,51 +51,60 @@ class Plot(str):
         dpg.configure_item(self.series, x=x, y=y)
 
 
-class Label(str):
-    def __new__(cls) -> Label:
-        label = dpg.add_button(
-            tag=str(generate_tag()),
-            **Config.LABEL,
+class PercentageWidthTableRow:
+    # https://github.com/hoffstadt/DearPyGui/discussions/1306
+
+    def __init__(self, **kwargs) -> None:
+        self.table_id = dpg.add_table(
+            header_row=False,
+            policy=dpg.mvTable_SizingStretchProp,
+            **kwargs,
         )
-        dpg.bind_item_font(label, Font.LABEL)
+        self.stage_id = dpg.add_stage()
+        dpg.push_container_stack(self.stage_id)
 
-        return super().__new__(cls, label)
+    def add_widget(self, uuid: Any, percentage: float) -> None:
+        dpg.add_table_column(
+            init_width_or_weight=percentage / 100.0, parent=self.table_id
+        )
+        dpg.set_item_width(uuid, -1)
 
-
-class Row:
-    table: PlotTable
-    label: Label
-    plot: Plot
-    height: int
-    label_format: Callable
-
-    def __init__(
-        self, can_id: int, id_format: Callable, height: int, x: Iterable, y: Iterable
-    ) -> None:
-        self._can_id = can_id
-        self.table = PlotTable()
-        self.label = Label()
-        self.plot = Plot(x, y)
-        self.table.add_label(self.label)
-        self.table.add_plot(self.plot)
-        self.table.submit()
-        self.set_label(id_format)
-        self.set_height(height)
-
-    def set_height(self, height: int) -> None:
-        dpg.set_item_height(self.label, height)
-        dpg.set_item_height(self.plot, height)
-        self.height = height
-
-    def set_label(self, id_format: Callable) -> None:
-        dpg.set_item_label(self.label, id_format(self._can_id))
-        self.label_format = id_format
+    def submit(self) -> None:
+        dpg.pop_container_stack()
+        with dpg.table_row(parent=self.table_id):
+            dpg.unstage(self.stage_id)
 
     def delete(self) -> None:
-        dpg.delete_item(self.table.table_id)
+        dpg.delete_item(self.table_id)
+        # dpg.delete_item(self.stage_id)
 
 
-class AxisData(dict):
+class PlotRow(PercentageWidthTableRow):
+    label: LabelItem
+    plot: PlotItem
+
+    def __init__(
+        self,
+        parent: int,
+        can_id: int,
+        x: Iterable,
+        y: Iterable,
+    ) -> None:
+        super().__init__(parent=parent)
+        self.can_id = can_id
+        self.label = LabelItem()
+        self.plot = PlotItem(x, y)
+        self.add_widget(self.label, Default.LABEL_COLUMN_WIDTH)
+        self.add_widget(self.plot, Default.PLOT_COLUMN_WIDTH)
+        self.submit()
+
+
+class PlotData:
+    x: Iterable
+    y: Iterable
+
+
+class PayloadAxisData(dict):
     x: tuple
     y: tuple
 

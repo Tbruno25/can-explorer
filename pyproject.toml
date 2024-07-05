@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "can-explorer"
-version = "0.1.9"
+version = "0.2.0"
 description = "Visualize CAN bus payloads in real time"
 license = "GPL-3.0-or-later"
 authors = ["TJ <tbruno25@gmail.com>"]
@@ -10,7 +10,7 @@ repository = "https://github.com/Tbruno25/can-explorer"
 keywords = ["can", "bus", "canbus", "can_bus", "dbc"]
 
 [tool.poetry.dependencies]
-python = ">=3.8, <4.0"
+python = ">=3.10, <4.0"
 pyserial = "^3.5"
 python-can = "^4.1.0"
 dearpygui = "^1.9.0"

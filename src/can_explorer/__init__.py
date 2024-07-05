@@ -1,5 +1,6 @@
-from can_explorer.controller import AppController
-from can_explorer.model import PlotModel
-from can_explorer.view import AppView
+from can_explorer.app import CanExplorer
+from can_explorer.controllers import Controller
+from can_explorer.models import PlotModel
+from can_explorer.views import MainView
 
-_all__ = ["PlotModel", "AppView", "AppController"]
+_all__ = ["PlotModel", "MainView", "Controller", "CanExplorer"]

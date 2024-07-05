@@ -4,7 +4,7 @@ from unittest.mock import Mock
 import dearpygui.dearpygui as dpg
 import pytest
 from can_explorer import AppController, PlotModel
-from can_explorer.config import Tag
+from can_explorer.configs import Tag
 from can_explorer.resources import generate_random_can_message
 
 DELAY = 0.1
