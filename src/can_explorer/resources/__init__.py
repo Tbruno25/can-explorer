@@ -1,7 +1,9 @@
 import pathlib
 import platform
-import uuid
+import threading
 from typing import Any, Final
+
+import can
 
 DIR_PATH: Final = pathlib.Path(__file__).parent
 
@@ -19,13 +21,6 @@ def frozen(value: Any) -> property:
         property
     """
     return property(fget=lambda _: value)
-
-
-def generate_tag() -> int:
-    """
-    Generate a random, unique tag.
-    """
-    return hash(uuid.uuid4())
 
 
 class Percentage:
@@ -56,3 +51,28 @@ class Percentage:
             int: Original value
         """
         return int((percentage * total) / 100.0)
+
+
+class StoppableThread(threading.Thread):
+    """
+    Basic thread that can be stopped during long running loops.
+
+    StoppableThread.cancel should be used as the while loop flag.
+
+    threading.current_thread can be used to access the thread from
+    within the target function.
+
+    Excample:
+
+        while not current_thread().cancel.wait(1):
+            ...
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cancel = threading.Event()
+
+    def stop(self):
+        self.cancel.set()
+        self.join()

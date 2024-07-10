@@ -1,59 +1,51 @@
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock
 
-import can_explorer
+import can
 import pytest
+from can_explorer.app import CanExplorer
+from can_explorer.controllers import Controller
 
 
 @pytest.fixture
-def mock_buffer():
-    with patch("can_explorer.can_bus.PayloadBuffer", autospec=True) as mock:
-        yield mock
+def vbus1():
+    yield can.interface.Bus(interface="virtual", channel="pytest")
 
 
 @pytest.fixture
-def mock_listener():
-    with patch("can_explorer.can_bus._Listener", autospec=True) as mock:
-        yield mock
-
-
-@pytest.fixture
-def mock_notifier():
-    with patch("can_explorer.can_bus.Notifier", autospec=True) as mock:
-        yield mock
-
-
-@pytest.fixture
-def fake_recorder(mock_listener, mock_notifier):
-    recorder = can_explorer.can_bus.Recorder()
-
-    with patch("can_explorer.can_bus.Recorder") as mock:
-        mock.return_value = recorder
-
-        yield recorder
-
-
-@pytest.fixture
-def fake_manager():
-    with patch("can_explorer.plotting.Row"):
-        manager = can_explorer.plotting.PlotManager()
-
-        with patch("can_explorer.plotting.PlotManager") as mock:
-            mock.return_value = manager
-
-            yield manager
-
-
-@pytest.fixture
-def fake_app(fake_manager, fake_recorder):
-    main_app = can_explorer.app.MainApp()
-    main_app.plot_manager = fake_manager
-    main_app.can_recorder = fake_recorder
-    main_app.set_bus(Mock())
-    yield main_app
+def vbus2():
+    yield can.interface.Bus(interface="virtual", channel="pytest")
 
 
 @pytest.fixture
 def app():
-    can_explorer.app.setup()
-    yield can_explorer.app.app
-    can_explorer.app.teardown()
+    ce = CanExplorer()
+    ce.setup()
+    yield ce
+    ce.teardown()
+
+
+@pytest.fixture
+def controller(app):
+    yield app.controller
+
+
+@pytest.fixture
+def view(app):
+    yield app.view
+
+
+@pytest.fixture
+def tag(view):
+    yield view.tag
+
+
+@pytest.fixture
+def model(app):
+    yield app.model
+
+
+@pytest.fixture
+def fake_controller(model):
+    yield Controller(
+        model=model, recorder=MagicMock(), bus=MagicMock(), view=MagicMock()
+    )
