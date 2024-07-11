@@ -68,6 +68,9 @@ class Controller:
             Exception: If CAN bus does not exist.
         """
 
+        if self.is_active():
+            raise RuntimeError("App is already running")
+
         if self.bus is None:
             raise RuntimeError("Must apply settings before starting")
 
