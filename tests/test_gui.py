@@ -15,8 +15,6 @@ from can_explorer.resources.demo import demo_config
 from tests.resources import WITHIN_CI
 from tests.resources.gui_components import Gui
 
-pytestmark = pytest.mark.order(1)
-
 if HOST_OS == "linux":
     import Xlib.display
     from pyvirtualdisplay.smartdisplay import SmartDisplay

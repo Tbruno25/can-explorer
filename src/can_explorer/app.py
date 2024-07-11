@@ -54,8 +54,9 @@ class CanExplorer:
 
         dpg.set_primary_window(app, True)
 
-    @staticmethod
-    def teardown():
+    def teardown(self):
+        if self.controller.is_active():
+            self.controller.stop()
         dpg.destroy_context()
 
     def exception_handler(self, exc_type, exc_value, exc_traceback):
