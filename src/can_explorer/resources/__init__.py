@@ -3,8 +3,6 @@ import platform
 import threading
 from typing import Any, Final
 
-import can
-
 DIR_PATH: Final = pathlib.Path(__file__).parent
 
 HOST_OS: Final = platform.system().lower()

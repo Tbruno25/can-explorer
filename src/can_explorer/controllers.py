@@ -15,7 +15,7 @@ from can_explorer.views import MainView
 
 
 class State(enum.Flag):
-    ACTIVE = True
+    RUNNING = True
     STOPPED = False
 
 
@@ -82,7 +82,7 @@ class Controller:
 
         self.view.set_main_button_label(True)
 
-        self._state = State.ACTIVE
+        self._state = State.RUNNING
 
     def stop(self) -> None:
         """
