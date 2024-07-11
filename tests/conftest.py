@@ -8,12 +8,16 @@ from can_explorer.controllers import Controller
 
 @pytest.fixture
 def vbus1():
-    yield can.interface.Bus(interface="virtual", channel="pytest")
+    bus = can.interface.Bus(interface="virtual", channel="pytest")
+    yield bus
+    bus.shutdown()
 
 
 @pytest.fixture
 def vbus2():
-    yield can.interface.Bus(interface="virtual", channel="pytest")
+    bus = can.interface.Bus(interface="virtual", channel="pytest")
+    yield bus
+    bus.shutdown()
 
 
 @pytest.fixture
