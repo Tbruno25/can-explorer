@@ -4,20 +4,46 @@ import logging
 import sys
 from collections.abc import Callable
 
+import can
 import dearpygui.dearpygui as dpg
 
 from can_explorer import can_bus
 from can_explorer.configs import Default
 from can_explorer.controllers import Controller
 from can_explorer.models import PlotModel
+from can_explorer.tags import Tag
 from can_explorer.views import MainView
 
 
 class CanExplorer:
-    def __init__(self) -> None:
-        self.model = PlotModel()
-        self.view = MainView()
-        self.controller = Controller(self.model, self.view)
+    def __init__(
+        self,
+        model: PlotModel | None = None,
+        view: MainView | None = None,
+        controller: Controller | None = None,
+        bus: can.BusABC | None = None,
+        tags: Tag | None = None,
+    ):
+        if controller and any([model, view]):
+            raise RuntimeError(
+                "Too many arguments | [model, view] or [controller] can be supplied, but not both."
+            )
+
+        elif controller is None:
+            self.model = model or PlotModel()
+            self.view = view or MainView()
+            self.controller = Controller(self.model, self.view)
+
+        else:
+            self.model = controller.model
+            self.view = controller.view
+            self.controller = controller
+
+        if bus is not None:
+            self.controller.set_bus(bus)
+
+        if tags is not None:
+            self.view.tag = tags
 
     def setup(self):
         dpg.create_context()

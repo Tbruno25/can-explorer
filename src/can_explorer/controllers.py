@@ -30,7 +30,7 @@ class Controller:
     ) -> None:
         self.model = model
         self.view = view
-        self.recorder = Recorder() if recorder is None else recorder
+        self.recorder = recorder or Recorder()
 
         self._bus = bus
         self._rate = refresh_rate
@@ -43,6 +43,8 @@ class Controller:
 
     @property
     def bus(self) -> BusABC | None:
+        if self._bus is None:
+            raise RuntimeError("Must apply settings before starting")
         return self._bus
 
     @property
@@ -68,11 +70,8 @@ class Controller:
             Exception: If CAN bus does not exist.
         """
 
-        if self.is_active():
+        if self.state == State.RUNNING:
             raise RuntimeError("App is already running")
-
-        if self.bus is None:
-            raise RuntimeError("Must apply settings before starting")
 
         self.recorder.set_bus(self.bus)
         self.recorder.start()
@@ -88,6 +87,9 @@ class Controller:
         """
         Stop the controller loop.
         """
+        if self.state == State.STOPPED:
+            return
+
         self.recorder.stop()
         self.worker.stop()
 

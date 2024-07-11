@@ -27,7 +27,10 @@ class PlotView:
     def __init__(self, parent: MainView) -> None:
         self._parent = parent
         self._row: dict[int, PlotRow] = {}
-        self.tag = parent.tag
+
+    @property
+    def tag(self) -> Tag:
+        return self._parent.tag
 
     def setup(self) -> None:
         pass
@@ -99,7 +102,6 @@ class PlotView:
 class SettingsView:
     def __init__(self, parent: MainView) -> None:
         self._parent = parent
-        self.tag = parent.tag
 
     def setup(self) -> None:
         with dpg.collapsing_header(label="CAN Bus", default_open=True):
@@ -135,6 +137,10 @@ class SettingsView:
                 label="Launch Style Editor", width=-1, callback=dpg.show_style_editor
             )
             dpg.add_spacer(height=5)
+
+    @property
+    def tag(self) -> Tag:
+        return self._parent.tag
 
     def get_interface(self) -> str:
         return dpg.get_value(self.tag.settings_interface)
@@ -191,8 +197,8 @@ class MainView:
     font: Font
     theme: Theme
 
-    def __init__(self) -> None:
-        self.tag = Tag()
+    def __init__(self, tags: Tag | None = None) -> None:
+        self.tag = tags or Tag()
         self.plot = PlotView(self)
         self.settings = SettingsView(self)
 
