@@ -28,4 +28,4 @@ def test_controller_populates_data_in_ascending_order(controller, view, vbus1, v
 
     time.sleep(0.1)
     plots = view.plot.get_rows()
-    assert list(plots) == sorted(plots)
+    assert plots and list(plots) == sorted(plots)
