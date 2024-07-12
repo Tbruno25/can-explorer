@@ -2,12 +2,12 @@ from unittest.mock import MagicMock
 
 import can
 import pytest
-from can_explorer.app import CanExplorer
-from can_explorer.controllers import Controller
+from can_explorer import CanExplorer, Controller, MainView, PlotModel
+from can_explorer.tags import Tag
 
 
 @pytest.fixture
-def vbus1():
+def vbus():
     bus = can.interface.Bus(interface="virtual", channel="pytest")
     yield bus
     bus.shutdown()
@@ -21,31 +21,31 @@ def vbus2():
 
 
 @pytest.fixture
-def app():
-    ce = CanExplorer()
-    ce.setup()
-    yield ce
-    ce.teardown()
+def model():
+    yield PlotModel()
 
 
 @pytest.fixture
-def controller(app):
-    yield app.controller
+def view():
+    yield MainView()
 
 
 @pytest.fixture
-def view(app):
-    yield app.view
+def controller(model, view, vbus2):
+    yield Controller(model, view, vbus2)
 
 
 @pytest.fixture
-def tag(view):
-    yield view.tag
+def tag():
+    yield Tag()
 
 
 @pytest.fixture
-def model(app):
-    yield app.model
+def app(controller, tag):
+    _app = CanExplorer(controller=controller, tags=tag)
+    _app.setup()
+    yield _app
+    _app.teardown()
 
 
 @pytest.fixture

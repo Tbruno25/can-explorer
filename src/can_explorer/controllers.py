@@ -15,7 +15,7 @@ from can_explorer.views import MainView
 
 
 class State(enum.Flag):
-    ACTIVE = True
+    RUNNING = True
     STOPPED = False
 
 
@@ -30,7 +30,7 @@ class Controller:
     ) -> None:
         self.model = model
         self.view = view
-        self.recorder = Recorder() if recorder is None else recorder
+        self.recorder = recorder or Recorder()
 
         self._bus = bus
         self._rate = refresh_rate
@@ -43,6 +43,8 @@ class Controller:
 
     @property
     def bus(self) -> BusABC | None:
+        if self._bus is None:
+            raise RuntimeError("Must apply settings before starting")
         return self._bus
 
     @property
@@ -68,8 +70,8 @@ class Controller:
             Exception: If CAN bus does not exist.
         """
 
-        if self.bus is None:
-            raise RuntimeError("Must apply settings before starting")
+        if self.state == State.RUNNING:
+            raise RuntimeError("App is already running")
 
         self.recorder.set_bus(self.bus)
         self.recorder.start()
@@ -79,12 +81,15 @@ class Controller:
 
         self.view.set_main_button_label(True)
 
-        self._state = State.ACTIVE
+        self._state = State.RUNNING
 
     def stop(self) -> None:
         """
         Stop the controller loop.
         """
+        if self.state == State.STOPPED:
+            return
+
         self.recorder.stop()
         self.worker.stop()
 
