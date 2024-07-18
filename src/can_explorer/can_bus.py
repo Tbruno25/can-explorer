@@ -53,7 +53,7 @@ class Listener(_Listener):
 
 class Recorder:
     _active = False
-    _bus: BusABC
+    _bus: BusABC | None
     _listener: Listener
     _notifier: Notifier
 
@@ -91,5 +91,5 @@ class Recorder:
     def get_data(self) -> dict:
         return self._data.copy()
 
-    def set_bus(self, bus: BusABC) -> None:
+    def set_bus(self, bus: BusABC | None) -> None:
         self._bus = bus

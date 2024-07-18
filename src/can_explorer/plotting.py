@@ -31,7 +31,7 @@ class PlotItem(str):
     y_axis: str
     series: str
 
-    def __new__(cls, data: PlotData) -> PlotItem:
+    def __new__(cls) -> PlotItem:
         with dpg.plot(
             tag=str(generate_tag()),
             no_title=True,
@@ -48,14 +48,9 @@ class PlotItem(str):
             plot.y_axis = dpg.add_plot_axis(
                 axis=dpg.mvYAxis, lock_min=True, lock_max=True, no_tick_labels=True
             )
-            plot.series = dpg.add_line_series(parent=plot.y_axis, x=data.x, y=data.y)
+            plot.series = dpg.add_line_series(parent=plot.y_axis, x=[], y=[])
 
         return plot
-
-    def update(self, data: PlotData) -> None:
-        dpg.set_axis_limits(self.x_axis, min(data.x), max(data.x))
-        dpg.set_axis_limits(self.y_axis, min(data.y), max(data.y))
-        dpg.configure_item(self.series, x=data.x, y=data.y)
 
 
 class _PercentageWidthTableRow:
@@ -84,18 +79,38 @@ class _PercentageWidthTableRow:
 
 
 class PlotRow:
-    label: LabelItem
-    plot: PlotItem
-
-    def __init__(self, parent: int, can_id: int, data: PlotData) -> None:
+    def __init__(self, parent: int) -> None:
         row = _PercentageWidthTableRow(parent)  # Must create first
-        self._id = row.table_id
-        self.can_id = can_id
+        self.id = row.table_id
         self.label = LabelItem()
-        self.plot = PlotItem(data)
+        self.plot = PlotItem()
         row.add_widget(self.label, Default.LABEL_COLUMN_WIDTH)
         row.add_widget(self.plot, Default.PLOT_COLUMN_WIDTH)
         row.submit()
 
     def delete(self) -> None:
-        dpg.delete_item(self._id)
+        dpg.delete_item(self.id)
+
+    def hide(self) -> None:
+        dpg.hide_item(self.id)
+
+    def show(self) -> None:
+        dpg.show_item(self.id)
+
+    def update(
+        self,
+        label: str | None = None,
+        data: PlotData | None = None,
+        height: int | None = None,
+    ) -> None:
+        if label is not None:
+            dpg.set_item_label(self.label, label)
+
+        if data is not None:
+            dpg.set_axis_limits(self.plot.x_axis, min(data.x), max(data.x))
+            dpg.set_axis_limits(self.plot.y_axis, min(data.y), max(data.y))
+            dpg.configure_item(self.plot.series, x=data.x, y=data.y)
+
+        if height is not None:
+            dpg.set_item_height(self.label, height)
+            dpg.set_item_height(self.plot, height)

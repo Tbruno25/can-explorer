@@ -97,31 +97,15 @@ class Controller:
 
         self._state = State.STOPPED
 
-    def repopulate(self) -> None:
-        """
-        Repopulate all plots in ascending order.
-        """
-        self.view.plot.clear()
-        for can_id, plot_data in sorted(self.model.get_plots().items()):
-            self.view.plot.update(can_id, plot_data)
-
     def _worker_loop(self) -> None:
         thread = cast(StoppableThread, current_thread())
         while not thread.cancel.wait(self._rate):
             current_data = self.recorder.get_data()
-            current_plots = self.model.get_plots()
-            refresh = False
 
             for can_id, payloads in current_data.items():
-                if can_id not in current_plots:
-                    refresh = True
-
                 self.model.update(can_id, payloads)
                 plot_data = self.model.get_plot_data(can_id)
                 self.view.plot.update(can_id, plot_data)
-
-            if refresh:
-                self.repopulate()
 
     def create_worker_thread(self) -> None:
         self._worker = StoppableThread(target=self._worker_loop, daemon=True)
@@ -143,7 +127,6 @@ class Controller:
     def plot_height_slider_callback(self, *args, **kwargs) -> None:
         self.view.plot.clear()
         self.view.plot.set_height(self.view.get_plot_height())
-        self.repopulate()
 
     def settings_apply_button_callback(self, *args, **kwargs) -> None:
         if self.is_active():
@@ -160,4 +143,3 @@ class Controller:
 
     def settings_can_id_format_callback(self, *args, **kwargs) -> None:
         self.view.plot.set_format(self.view.settings.get_id_format())
-        self.repopulate()
