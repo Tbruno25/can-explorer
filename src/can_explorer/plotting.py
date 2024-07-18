@@ -25,6 +25,9 @@ class LabelItem(str):
 
         return super().__new__(cls, label)
 
+    def update(self, label: int | str) -> None:
+        dpg.set_item_label(self, label)
+
 
 class PlotItem(str):
     x_axis: str
