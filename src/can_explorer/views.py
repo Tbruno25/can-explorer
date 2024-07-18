@@ -36,21 +36,10 @@ class PlotView:
         pass
 
     @synchronized
-    def _add_row(self, can_id: int, plot_data: PlotData) -> None:
-        row = PlotRow(self.tag.plot_tab, can_id, plot_data)
+    def _add_row(self, can_id: int) -> None:
+        row = PlotRow(self.tag.plot_tab)
         dpg.bind_item_font(row.label, self._parent.font.large)
-        self._set_row_format(row, self._format)
-        self._set_row_height(row, self._height)
         self._row[can_id] = row
-
-    @staticmethod
-    def _set_row_height(row: PlotRow, height: int) -> None:
-        dpg.set_item_height(row.label, height)
-        dpg.set_item_height(row.plot, height)
-
-    @staticmethod
-    def _set_row_format(row: PlotRow, id_format: Callable) -> None:
-        dpg.set_item_label(row.label, id_format(row.can_id))
 
     def get_rows(self) -> dict:
         return self._row.copy()
@@ -58,9 +47,10 @@ class PlotView:
     @synchronized
     def update(self, can_id: int, plot_data: PlotData) -> None:
         if can_id not in self._row:
-            self._add_row(can_id, plot_data)
-        else:
-            self._row[can_id].plot.update(plot_data)
+            self._add_row(can_id)
+        self._row[can_id].update(
+            label=self._format(can_id), data=plot_data, height=self._height
+        )
 
     @synchronized
     def remove(self, can_id: int) -> None:
@@ -80,8 +70,8 @@ class PlotView:
         Args:
             id_format (Callable)
         """
-        for row in self.get_rows().values():
-            self._set_row_format(row, id_format)
+        for can_id, row in self.get_rows().items():
+            row.update(label=id_format(can_id))
 
         self._format = id_format
 
@@ -94,7 +84,7 @@ class PlotView:
             height (int)
         """
         for row in self.get_rows().values():
-            self._set_row_height(row, height)
+            row.update(height=height)
 
         self._height = height
 
