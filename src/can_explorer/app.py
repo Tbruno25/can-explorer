@@ -48,8 +48,7 @@ class CanExplorer:
     def setup(self):
         dpg.create_context()
 
-        with dpg.window() as app:
-            self.view.setup()
+        main_window = self.view.ui.build()
 
         self.view.settings.set_interface_options(can_bus.INTERFACES)
         self.view.settings.set_baudrate_options(can_bus.BAUDRATES)
@@ -78,7 +77,7 @@ class CanExplorer:
         dpg.setup_dearpygui()
         self.view.resize()
 
-        dpg.set_primary_window(app, True)
+        dpg.set_primary_window(main_window, True)
 
     def teardown(self):
         if self.controller.is_active():

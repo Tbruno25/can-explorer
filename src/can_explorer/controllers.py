@@ -125,7 +125,6 @@ class Controller:
             self.view.plot.update(can_id, plot_data)
 
     def plot_height_slider_callback(self, *args, **kwargs) -> None:
-        self.view.plot.clear()
         self.view.plot.set_height(self.view.get_plot_height())
 
     def settings_apply_button_callback(self, *args, **kwargs) -> None:
