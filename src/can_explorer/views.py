@@ -1,17 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Collection
-from dataclasses import dataclass
 from typing import cast
 
 import dearpygui.dearpygui as dpg
-from dearpygui_ext.themes import create_theme_imgui_light
 from wrapt import synchronized
 
 from can_explorer.configs import Default
 from can_explorer.plotting import PlotData, PlotRow
 from can_explorer.resources import Percentage
 from can_explorer.tags import Tag
+from can_explorer.ui_builder import UIBuilder
 
 # Some dpg functionality is not thread safe
 #   ie: adding and removing widgets
@@ -34,12 +33,9 @@ class PlotView:
     def tag(self) -> Tag:
         return self._parent.tag
 
-    def setup(self) -> None:
-        pass
-
     def _add_row(self) -> None:
         row = PlotRow(self.tag.plot_tab)
-        dpg.bind_item_font(row.label, self._parent.font.large)
+        dpg.bind_item_font(row.label, self._parent.font.large)  # type: ignore
         self._row_values.append(row)
 
     def _sync_rows(self) -> None:
@@ -109,41 +105,6 @@ class SettingsView:
     def __init__(self, parent: MainView) -> None:
         self._parent = parent
 
-    def setup(self) -> None:
-        with dpg.collapsing_header(label="CAN Bus", default_open=True):
-            dpg.add_combo(tag=self.tag.settings_interface, label="Interface")
-            dpg.add_input_text(tag=self.tag.settings_channel, label="Channel")
-            dpg.add_combo(tag=self.tag.settings_baudrate, label="Baudrate")
-            dpg.add_spacer(height=5)
-            dpg.add_button(tag=self.tag.settings_apply, label="Apply", height=30)
-            dpg.add_spacer(height=5)
-
-        with dpg.collapsing_header(label="GUI"):
-            with dpg.group(horizontal=True):
-                dpg.add_text("ID Format")
-                dpg.add_radio_button(
-                    ["Hex", "Dec"],
-                    tag=self.tag.settings_id_format,
-                    horizontal=True,
-                )
-            with dpg.group(horizontal=True):
-                dpg.add_text("Theme")
-                dpg.add_radio_button(
-                    ["Default", "Light"],
-                    horizontal=True,
-                    callback=lambda sender: dpg.bind_theme(
-                        getattr(self._parent.theme, dpg.get_value(sender).lower())
-                    ),
-                )
-
-            dpg.add_button(
-                label="Launch Font Manager", width=-1, callback=dpg.show_font_manager
-            )
-            dpg.add_button(
-                label="Launch Style Editor", width=-1, callback=dpg.show_style_editor
-            )
-            dpg.add_spacer(height=5)
-
     @property
     def tag(self) -> Tag:
         return self._parent.tag
@@ -187,132 +148,14 @@ class SettingsView:
         )
 
 
-@dataclass
-class Font:
-    default: int
-    large: int
-
-
-@dataclass
-class Theme:
-    default: int
-    light: int
-
-
 class MainView:
-    font: Font
-    theme: Theme
-
     def __init__(self, tags: Tag | None = None) -> None:
         self.tag = tags or Tag()
+        self.ui = UIBuilder(self)
         self.plot = PlotView(self)
         self.settings = SettingsView(self)
-
-    def setup(self) -> None:
-        self._fonts()
-        self._themes()
-        self._header()
-        self._body()
-        self._footer()
-
-    def _fonts(self):
-        with dpg.font_registry():
-            self.font = Font(
-                default=dpg.add_font(Default.FONT, Default.FONT_HEIGHT),
-                large=dpg.add_font(Default.FONT, Default.FONT_HEIGHT * 1.75),
-            )
-
-        dpg.bind_font(self.font.default)
-
-    def _themes(self):
-        with dpg.theme() as default:
-            with dpg.theme_component(dpg.mvButton, enabled_state=False):
-                dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, Default.BACKGROUND)
-                dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, Default.BACKGROUND)
-
-            self.theme = Theme(default=default, light=create_theme_imgui_light())
-
-        dpg.bind_theme(self.theme.default)
-
-    def _header(self) -> None:
-        def tab_callback(sender, app_data, user_data) -> None:
-            current_tab = dpg.get_item_label(app_data)
-
-            if current_tab == "Viewer":
-                dpg.configure_item(self.tag.plot_tab, show=True)
-                dpg.configure_item(self.tag.settings_tab, show=False)
-            else:
-                dpg.configure_item(self.tag.plot_tab, show=False)
-                dpg.configure_item(self.tag.settings_tab, show=True)
-
-        with dpg.tab_bar(tag=self.tag.header, callback=tab_callback):
-            dpg.add_tab(label="Viewer")
-            dpg.add_tab(label="Settings")
-
-    def _body(self) -> None:
-        with dpg.child_window(tag=self.tag.body, border=False):
-            with dpg.group(tag=self.tag.plot_tab, show=True):
-                self.plot.setup()
-            with dpg.group(tag=self.tag.settings_tab, show=False):
-                self.settings.setup()
-
-    def _footer(self) -> None:
-        with dpg.child_window(
-            tag=self.tag.footer, height=110, border=False, no_scrollbar=True
-        ):
-            dpg.add_spacer(height=2)
-            dpg.add_separator()
-            dpg.add_spacer(height=2)
-
-            with dpg.table(header_row=False):
-                dpg.add_table_column()
-                dpg.add_table_column()
-                with dpg.table_row():
-                    with dpg.group(horizontal=True):
-                        dpg.add_text("Message Buffer Size")
-                        dpg.add_spacer()
-                        dpg.add_slider_int(
-                            tag=self.tag.plot_buffer_slider,
-                            width=-1,
-                            default_value=Percentage.get(
-                                Default.BUFFER_SIZE, Default.BUFFER_MAX
-                            ),
-                            min_value=2,
-                            max_value=100,
-                            clamped=True,
-                            format="%d%%",
-                        )
-
-                    with dpg.group(horizontal=True):
-                        dpg.add_text("Plot Height")
-                        dpg.add_spacer()
-                        dpg.add_slider_int(
-                            tag=self.tag.plot_height_slider,
-                            width=-1,
-                            default_value=Percentage.get(
-                                Default.PLOT_HEIGHT, Default.PLOT_HEIGHT_MAX
-                            ),
-                            min_value=10,
-                            max_value=100,
-                            clamped=True,
-                            format="%d%%",
-                        )
-            dpg.add_spacer(height=2)
-
-            dpg.add_separator()
-            dpg.add_spacer(height=2)
-            with dpg.group(horizontal=True):
-                dpg.add_button(
-                    tag=self.tag.main_button,
-                    width=-100,
-                    height=50,
-                )
-                dpg.add_button(
-                    tag=self.tag.clear_button,
-                    label="Clear",
-                    width=-1,
-                    height=50,
-                )
+        self.font = None
+        self.theme = None
 
     def resize(self) -> None:
         dpg.set_item_height(
