@@ -99,3 +99,9 @@ class PlotRow:
 
     def delete(self) -> None:
         dpg.delete_item(self._id)
+
+    def hide(self) -> None:
+        dpg.hide_item(self._id)
+
+    def show(self) -> None:
+        dpg.show_item(self._id)
