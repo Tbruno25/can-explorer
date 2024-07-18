@@ -26,7 +26,9 @@ class PlotView:
 
     def __init__(self, parent: MainView) -> None:
         self._parent = parent
-        self._row: dict[int, PlotRow] = {}
+        self._row_keys: list[int] = []
+        self._row_values: list[PlotRow] = []
+        self._row_dict: dict[int, PlotRow] = {}
 
     @property
     def tag(self) -> Tag:
@@ -35,31 +37,45 @@ class PlotView:
     def setup(self) -> None:
         pass
 
-    @synchronized
-    def _add_row(self, can_id: int) -> None:
+    def _add_row(self) -> None:
         row = PlotRow(self.tag.plot_tab)
         dpg.bind_item_font(row.label, self._parent.font.large)
-        self._row[can_id] = row
+        self._row_values.append(row)
+
+    def _sync_rows(self) -> None:
+        while len(self._row_keys) > len(self._row_values):
+            self._add_row()
+
+        sorted_rows = dict(zip(sorted(self._row_keys), self._row_values))
+
+        for row in self._row_values:
+            if row in sorted_rows.values():
+                row.show()
+            else:
+                row.hide()
+
+        self._row_dict = sorted_rows
 
     def get_rows(self) -> dict:
-        return self._row.copy()
+        return self._row_dict.copy()
 
     @synchronized
     def update(self, can_id: int, plot_data: PlotData) -> None:
-        if can_id not in self._row:
-            self._add_row(can_id)
-        self._row[can_id].update(
+        if can_id not in self._row_keys:
+            self._row_keys.append(can_id)
+            self._sync_rows()
+        self._row_dict[can_id].update(
             label=self._format(can_id), data=plot_data, height=self._height
         )
 
     @synchronized
     def remove(self, can_id: int) -> None:
-        row = self._row.pop(can_id)
-        row.delete()
+        self._row_keys.remove(can_id)
+        self._row_dict[can_id].hide()
 
     @synchronized
     def clear(self) -> None:
-        for can_id in self.get_rows():
+        for can_id in self._row_keys:
             self.remove(can_id)
 
     @synchronized
