@@ -20,49 +20,45 @@ class PlotView:
         self._parent = parent
         self._row_keys: list[int] = []
         self._row_values: list[PlotRow] = []
-        self._row_dict: dict[int, PlotRow] = {}
 
     @property
     def tag(self) -> Tag:
         return self._parent.tag
 
-    def _add_row(self) -> None:
-        row = PlotRow(self.tag.plot_tab)
-        dpg.bind_item_font(row.label, self._parent.font.large)  # type: ignore
-        self._row_values.append(row)
+    def add_row(self, can_id: int) -> None:
+        self._row_keys.append(can_id)
+        self._row_keys.sort()
+        self._row_values.append(PlotRow(self.tag.plot_tab))
+        dpg.bind_item_font(self._row_values[-1].label, self._parent.font.large)  # type: ignore
 
     def _sync_rows(self) -> None:
         """
-        Pair the current row_keys with the row_values.
         Automatically hide's any rows not being used.
         """
-        while len(self._row_keys) > len(self._row_values):
-            self._add_row()
 
-        sorted_rows = dict(zip(sorted(self._row_keys), self._row_values))
-
-        for row in self._row_values:
-            if row in sorted_rows.values():
+        for index, row in enumerate(self._row_values):
+            try:
+                self._row_keys[index]
                 row.show()
-            else:
+            except IndexError:
                 row.hide()
 
-        self._row_dict = sorted_rows
-
     def get_rows(self) -> dict:
-        return self._row_dict.copy()
+        return dict(zip(self._row_keys, self._row_values))
 
     def update(self, can_id: int, plot_data: PlotData) -> None:
         if can_id not in self._row_keys:
-            self._row_keys.append(can_id)
+            self.add_row(can_id)
             self._sync_rows()
-        self._row_dict[can_id].update(
+
+        index = self._row_keys.index(can_id)
+        self._row_values[index].update(
             label=self._format(can_id), data=plot_data, height=self._height
         )
 
     def remove(self, can_id: int) -> None:
         self._row_keys.remove(can_id)
-        self._row_dict[can_id].hide()
+        self._sync_rows()
 
     def clear(self) -> None:
         while self._row_keys:
@@ -87,7 +83,7 @@ class PlotView:
         Args:
             height (int)
         """
-        for row in self.get_rows().values():
+        for row in self._row_values:
             row.update(height=height)
 
         self._height = height
