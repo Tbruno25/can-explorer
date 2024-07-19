@@ -39,6 +39,10 @@ class PlotView:
         self._row_values.append(row)
 
     def _sync_rows(self) -> None:
+        """
+        Pair the current row_keys with the row_values.
+        Automatically hide's any rows not being used.
+        """
         while len(self._row_keys) > len(self._row_values):
             self._add_row()
 

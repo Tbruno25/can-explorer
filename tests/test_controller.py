@@ -42,3 +42,10 @@ def test_controller_cannot_start_without_stopping(app, tag, controller):
     assert controller.is_active()
     with pytest.raises(RuntimeError):
         controller.start()
+
+
+def test_controller_must_be_inactive_to_apply_settings(app, tag, controller):
+    controller.start()
+    assert controller.is_active()
+    with pytest.raises(RuntimeError):
+        controller.settings_apply_button_callback()

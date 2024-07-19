@@ -5,6 +5,7 @@ from functools import partial
 from pathlib import Path
 from time import sleep
 
+import dearpygui.dearpygui as dpg
 import pyautogui
 import pytest
 from can_explorer.app import CanExplorer
@@ -80,23 +81,26 @@ def virtual_gui(request, process):
         save_screenshot(request)
 
 
-def test_gui_launch_basic(virtual_gui):
-    pytest.skip("Todo")
+def test_gui_launch(app, controller, tag):
+    assert dpg.is_dearpygui_running()
 
+    # Check if the main window was created
+    assert dpg.does_item_exist(tag.header)
+    assert dpg.does_item_exist(tag.body)
+    assert dpg.does_item_exist(tag.footer)
 
-def test_gui_must_be_inactive_to_apply_settings(app, tag, controller):
-    pytest.skip("Todo")
-    # app.run()
+    # Check if key UI elements exist
+    assert dpg.does_item_exist(tag.main_button)
+    assert dpg.does_item_exist(tag.clear_button)
+    assert dpg.does_item_exist(tag.plot_buffer_slider)
+    assert dpg.does_item_exist(tag.plot_height_slider)
 
-    # dpg.set_value(tag.settings_interface, "virtual")
-    # controller.settings_apply_button_callback()
+    # Check if the settings tab exists
+    assert dpg.does_item_exist(tag.settings_tab)
 
-    # controller.start_stop_button_callback()
-    # assert controller.is_active()
-
-    # dpg.set_value(tag.settings_interface, None)
-    # with pytest.raises(RuntimeError):
-    #     controller.settings_apply_button_callback()
+    # Verify initial state
+    assert not controller.is_active()
+    assert dpg.get_item_label(tag.main_button) == "Start"
 
 
 def test_gui_visualizes_traffic(virtual_gui):
