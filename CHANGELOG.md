@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ---
+## [0.2.1] - 2024-07-19
+
+### Fixed
+
+- Message buffer slider bug 
+
+---
 ## [0.2.0] - 2024-07-19
 
 ### Changed
@@ -22,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Internal global variables
 - Support for python versions older than 3.10
+
 ---
 ## [0.1.8] - 2024-06-26
 
