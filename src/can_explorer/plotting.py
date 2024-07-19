@@ -10,6 +10,13 @@ from can_explorer.configs import Default
 from can_explorer.tags import generate_tag
 
 
+def convert_payloads(payloads: Collection) -> PlotData:
+    return PlotData(
+        x=tuple(range(len(payloads))),
+        y=tuple(payloads),
+    )
+
+
 @dataclass
 class PlotData:
     x: Collection

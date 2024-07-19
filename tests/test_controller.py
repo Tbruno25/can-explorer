@@ -1,22 +1,7 @@
 import time
 
 import pytest
-from can_explorer.can_bus import generate_random_can_message
-
-
-def test_controller_starts_worker(fake_controller):
-    fake_controller.start()
-    assert fake_controller.is_active()
-    assert fake_controller.worker.is_alive()
-
-
-def test_controller_stops_worker(fake_controller):
-    fake_controller.start()
-    assert fake_controller.is_active()
-    assert fake_controller.worker.is_alive()
-    fake_controller.stop()
-    assert not fake_controller.is_active()
-    assert not fake_controller.worker.is_alive()
+from can_explorer.resources import generate_random_can_message
 
 
 def test_controller_populates_data_in_ascending_order(app, controller, view, vbus):

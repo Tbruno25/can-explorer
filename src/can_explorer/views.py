@@ -75,8 +75,8 @@ class PlotView:
 
     @synchronized
     def clear(self) -> None:
-        for can_id in self._row_keys:
-            self.remove(can_id)
+        while self._row_keys:
+            self.remove(self._row_keys[0])
 
     @synchronized
     def set_format(self, id_format: Callable) -> None:

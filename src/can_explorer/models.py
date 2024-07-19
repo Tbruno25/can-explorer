@@ -1,48 +1,37 @@
-from collections.abc import Collection
+from collections import defaultdict, deque
 
-from can_explorer.can_bus import PayloadBuffer
+import can
+
 from can_explorer.configs import Default
-from can_explorer.plotting import PlotData
+from can_explorer.plotting import PlotData, convert_payloads
 
 
-def convert_payloads(payloads: Collection) -> PlotData:
-    return PlotData(
-        x=tuple(range(len(payloads))),
-        y=tuple(payloads),
-    )
+class PayloadBuffer(deque):
+    def __init__(self):
+        self.MIN = Default.BUFFER_MIN
+        self.MAX = Default.BUFFER_MAX
+        super().__init__([0] * self.MAX, maxlen=self.MAX)
+
+    def __getitem__(self, index) -> tuple:  # type: ignore [override]
+        # Add ability to utilize slicing
+        # Note: must convert deque to avoid runtime error
+        if isinstance(index, slice):
+            return tuple(self)[index.start : index.stop : index.step]
+        return tuple(deque.__getitem__(self, index))
 
 
 class PlotModel:
-    _len = Default.BUFFER_SIZE
-
     def __init__(self) -> None:
-        self._plot: dict[int, PlotData] = {}
+        self._data = defaultdict(PayloadBuffer)
+        self._len = Default.BUFFER_SIZE
 
-    def update(self, can_id: int, payloads: PayloadBuffer) -> None:
-        """
-        Update a plot.
+    def add_message(self, message: can.Message) -> None:
+        can_id = message.arbitration_id
+        val = int.from_bytes(message.data, byteorder="big")
+        self._data[can_id].append(val)
 
-        Args:
-            can_id (int)
-            payloads (PayloadBuffer)
-        """
-        plot_data = convert_payloads(payloads[-self._len :])
-        self._plot[can_id] = plot_data
-
-    def get_plot_data(self, can_id: int) -> PlotData:
-        return self._plot[can_id]
-
-    def get_plots(self) -> dict:
-        """
-        Get all plots.
-        """
-        return self._plot.copy()
-
-    def clear(self) -> None:
-        """
-        Remove all plots.
-        """
-        self._plot.clear()
+    def get_data(self, can_id: int) -> PlotData:
+        return convert_payloads(self._data[can_id][-self._len :])
 
     def set_limit(self, limit: int) -> None:
         """
