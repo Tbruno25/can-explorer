@@ -4,12 +4,17 @@ from collections.abc import Callable, Collection
 from typing import cast
 
 import dearpygui.dearpygui as dpg
+from wrapt import synchronized
 
 from can_explorer.configs import Default
 from can_explorer.plotting import PlotData, PlotRow
 from can_explorer.resources import Percentage
 from can_explorer.tags import Tag
 from can_explorer.ui_builder import UIBuilder
+
+# The synchronized decorator is used to provide
+# the instance with a lock for thread safety
+# https://github.com/GrahamDumpleton/wrapt/blob/develop/blog/07-the-missing-synchronized-decorator.md
 
 
 class PlotView:
@@ -20,53 +25,53 @@ class PlotView:
         self._parent = parent
         self._row_keys: list[int] = []
         self._row_values: list[PlotRow] = []
-        self._row_dict: dict[int, PlotRow] = {}
 
     @property
     def tag(self) -> Tag:
         return self._parent.tag
 
-    def _add_row(self) -> None:
-        row = PlotRow(self.tag.plot_tab)
-        dpg.bind_item_font(row.label, self._parent.font.large)  # type: ignore
-        self._row_values.append(row)
+    @synchronized
+    def add_row(self, can_id: int) -> None:
+        self._row_keys.append(can_id)
+        self._row_keys.sort()
+        self._row_values.append(PlotRow(self.tag.plot_tab))
+        dpg.bind_item_font(self._row_values[-1].label, self._parent.font.large)  # type: ignore
 
-    def _sync_rows(self) -> None:
-        """
-        Pair the current row_keys with the row_values.
-        Automatically hide's any rows not being used.
-        """
-        while len(self._row_keys) > len(self._row_values):
-            self._add_row()
-
-        sorted_rows = dict(zip(sorted(self._row_keys), self._row_values))
-
-        for row in self._row_values:
-            if row in sorted_rows.values():
-                row.show()
-            else:
-                row.hide()
-
-        self._row_dict = sorted_rows
-
-    def get_rows(self) -> dict:
-        return self._row_dict.copy()
-
-    def update(self, can_id: int, plot_data: PlotData) -> None:
-        if can_id not in self._row_keys:
-            self._row_keys.append(can_id)
-            self._sync_rows()
-        self._row_dict[can_id].update(
-            label=self._format(can_id), data=plot_data, height=self._height
-        )
-
-    def remove(self, can_id: int) -> None:
-        self._row_keys.remove(can_id)
-        self._row_dict[can_id].hide()
-
+    @synchronized
     def clear(self) -> None:
         while self._row_keys:
             self.remove(self._row_keys[0])
+
+    def get_rows(self) -> dict:
+        return dict(zip(self._row_keys, self._row_values))
+
+    @synchronized
+    def remove(self, can_id: int) -> None:
+        self._row_keys.remove(can_id)
+        self._sync_rows()
+
+    @synchronized
+    def update(self, can_id: int, plot_data: PlotData) -> None:
+        if can_id not in self._row_keys:
+            self.add_row(can_id)
+            self._sync_rows()
+
+        index = self._row_keys.index(can_id)
+        self._row_values[index].update(
+            label=self._format(can_id), data=plot_data, height=self._height
+        )
+
+    def _sync_rows(self) -> None:
+        """
+        Automatically hide's any rows not being used.
+        """
+
+        for index, row in enumerate(self._row_values):
+            try:
+                self._row_keys[index]
+                row.show()
+            except IndexError:
+                row.hide()
 
     def set_format(self, id_format: Callable) -> None:
         """
@@ -87,7 +92,7 @@ class PlotView:
         Args:
             height (int)
         """
-        for row in self.get_rows().values():
+        for row in self._row_values:
             row.update(height=height)
 
         self._height = height
