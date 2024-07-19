@@ -4,19 +4,12 @@ from collections.abc import Callable, Collection
 from typing import cast
 
 import dearpygui.dearpygui as dpg
-from wrapt import synchronized
 
 from can_explorer.configs import Default
 from can_explorer.plotting import PlotData, PlotRow
 from can_explorer.resources import Percentage
 from can_explorer.tags import Tag
 from can_explorer.ui_builder import UIBuilder
-
-# Some dpg functionality is not thread safe
-#   ie: adding and removing widgets
-# The synchronized decorator is used to provide
-# the instance with a lock for thread safety
-# https://github.com/GrahamDumpleton/wrapt/blob/develop/blog/07-the-missing-synchronized-decorator.md
 
 
 class PlotView:
@@ -59,7 +52,6 @@ class PlotView:
     def get_rows(self) -> dict:
         return self._row_dict.copy()
 
-    @synchronized
     def update(self, can_id: int, plot_data: PlotData) -> None:
         if can_id not in self._row_keys:
             self._row_keys.append(can_id)
@@ -68,17 +60,14 @@ class PlotView:
             label=self._format(can_id), data=plot_data, height=self._height
         )
 
-    @synchronized
     def remove(self, can_id: int) -> None:
         self._row_keys.remove(can_id)
         self._row_dict[can_id].hide()
 
-    @synchronized
     def clear(self) -> None:
         while self._row_keys:
             self.remove(self._row_keys[0])
 
-    @synchronized
     def set_format(self, id_format: Callable) -> None:
         """
         Set the format CAN id's will be displayed as.
@@ -91,7 +80,6 @@ class PlotView:
 
         self._format = id_format
 
-    @synchronized
     def set_height(self, height: int) -> None:
         """
         Set the height of all plots.
