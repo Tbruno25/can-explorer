@@ -81,7 +81,7 @@ def virtual_gui(request, process):
         save_screenshot(request)
 
 
-def test_gui_launch_basic(app, controller, tag):
+def test_gui_launch(app, controller, tag):
     assert dpg.is_dearpygui_running()
 
     # Check if the main window was created
@@ -101,21 +101,6 @@ def test_gui_launch_basic(app, controller, tag):
     # Verify initial state
     assert not controller.is_active()
     assert dpg.get_item_label(tag.main_button) == "Start"
-
-
-def test_gui_must_be_inactive_to_apply_settings(app, tag, controller):
-    pytest.skip("Todo")
-    # app.run()
-
-    # dpg.set_value(tag.settings_interface, "virtual")
-    # controller.settings_apply_button_callback()
-
-    # controller.start_stop_button_callback()
-    # assert controller.is_active()
-
-    # dpg.set_value(tag.settings_interface, None)
-    # with pytest.raises(RuntimeError):
-    #     controller.settings_apply_button_callback()
 
 
 def test_gui_visualizes_traffic(virtual_gui):
