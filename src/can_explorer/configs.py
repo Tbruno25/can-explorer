@@ -1,5 +1,7 @@
 from typing import Final
 
+from can.interfaces import VALID_INTERFACES
+
 from can_explorer.resources import DIR_PATH as RESOURCES_DIR
 from can_explorer.resources import HOST_OS
 
@@ -21,3 +23,9 @@ class Default:
     TITLE: Final = "CAN Explorer"
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
     FOOTER_OFFSET: Final = 50 if HOST_OS == "linux" else 85
+
+
+class CANBus:
+    INTERFACES: Final = sorted(list(VALID_INTERFACES))
+    _BAUDRATES = [33_333, 125_000, 250_000, 500_000, 1_000_000]
+    BAUDRATES: Final = [format(i, "_d") for i in _BAUDRATES]

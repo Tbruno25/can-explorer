@@ -1,16 +1,12 @@
 from __future__ import annotations
 
 import enum
-from threading import current_thread
-from typing import cast
 
 import can
 from can.bus import BusABC
 
-from can_explorer.can_bus import Recorder
 from can_explorer.configs import Default
 from can_explorer.models import PlotModel
-from can_explorer.resources import StoppableThread
 from can_explorer.views import MainView
 
 
@@ -25,38 +21,30 @@ class Controller:
         model: PlotModel,
         view: MainView,
         bus: BusABC | None = None,
-        recorder: Recorder | None = None,
         refresh_rate: float | None = Default.REFRESH_RATE,
     ) -> None:
         self.model = model
         self.view = view
-        self.recorder = recorder or Recorder()
+        self.notififer: can.Notifier | None = None
 
         self._bus = bus
         self._rate = refresh_rate
         self._state = State.STOPPED
-        self._worker: StoppableThread | None = None
 
     @property
     def state(self) -> State:
         return self._state
 
     @property
-    def bus(self) -> BusABC | None:
+    def bus(self) -> BusABC:
         if self._bus is None:
             raise RuntimeError("Must apply settings before starting")
         return self._bus
 
-    @property
-    def worker(self) -> StoppableThread:
-        if self._worker is None:
-            raise RuntimeError("Worker not set.")
-        return self._worker
-
     def is_active(self) -> bool:
         return bool(self.state)
 
-    def set_bus(self, bus: can.BusABC) -> None:
+    def set_bus(self, bus: BusABC) -> None:
         """
         Set CAN bus to use during controller loop.
         """
@@ -73,14 +61,8 @@ class Controller:
         if self.state == State.RUNNING:
             raise RuntimeError("App is already running")
 
-        self.recorder.set_bus(self.bus)
-        self.recorder.start()
-
-        self.create_worker_thread()
-        self.worker.start()
-
+        self.notifier = can.Notifier(self.bus, [self._on_message_received])
         self.view.set_main_button_label(True)
-
         self._state = State.RUNNING
 
     def stop(self) -> None:
@@ -90,38 +72,25 @@ class Controller:
         if self.state == State.STOPPED:
             return
 
-        self.recorder.stop()
-        self.worker.stop()
-
+        self.notifier.stop()
         self.view.set_main_button_label(False)
-
         self._state = State.STOPPED
 
-    def _worker_loop(self) -> None:
-        thread = cast(StoppableThread, current_thread())
-        while not thread.cancel.wait(self._rate):
-            current_data = self.recorder.get_data()
-
-            for can_id, payloads in current_data.items():
-                self.model.update(can_id, payloads)
-                plot_data = self.model.get_plot_data(can_id)
-                self.view.plot.update(can_id, plot_data)
-
-    def create_worker_thread(self) -> None:
-        self._worker = StoppableThread(target=self._worker_loop, daemon=True)
+    def _on_message_received(self, message: can.Message):
+        self.model.add_message(message)
+        plot_data = self.model.get_data(message.arbitration_id)
+        self.view.plot.update(message.arbitration_id, plot_data)
 
     def start_stop_button_callback(self, *args, **kwargs) -> None:
         self.stop() if self.is_active() else self.start()
 
     def clear_button_callback(self, *args, **kwargs) -> None:
-        self.model.clear()
         self.view.plot.clear()
 
     def plot_buffer_slider_callback(self, *args, **kwargs) -> None:
         self.model.set_limit(self.view.get_plot_buffer())
-        for can_id, payloads in self.recorder.get_data().items():
-            self.model.update(can_id, payloads)
-            plot_data = self.model.get_plot_data(can_id)
+        for can_id in self.view.plot.get_rows():
+            plot_data = self.model.get_data(can_id)
             self.view.plot.update(can_id, plot_data)
 
     def plot_height_slider_callback(self, *args, **kwargs) -> None:

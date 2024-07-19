@@ -7,8 +7,7 @@ from collections.abc import Callable
 import can
 import dearpygui.dearpygui as dpg
 
-from can_explorer import can_bus
-from can_explorer.configs import Default
+from can_explorer.configs import CANBus, Default
 from can_explorer.controllers import Controller
 from can_explorer.models import PlotModel
 from can_explorer.tags import Tag
@@ -50,8 +49,8 @@ class CanExplorer:
 
         main_window = self.view.ui.build()
 
-        self.view.settings.set_interface_options(can_bus.INTERFACES)
-        self.view.settings.set_baudrate_options(can_bus.BAUDRATES)
+        self.view.settings.set_interface_options(CANBus.INTERFACES)
+        self.view.settings.set_baudrate_options(CANBus.BAUDRATES)
         self.view.settings.set_apply_button_callback(
             self.controller.settings_apply_button_callback
         )

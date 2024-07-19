@@ -1,24 +1,24 @@
 import pathlib
 import platform
 import threading
+from random import randint
 from typing import Any, Final
+
+from can import Message
 
 DIR_PATH: Final = pathlib.Path(__file__).parent
 
 HOST_OS: Final = platform.system().lower()
 
 
-def frozen(value: Any) -> property:
+def generate_random_can_message() -> Message:
     """
-    Helper function to create an inline property.
-
-    Args:
-        value (Any)
-
-    Returns:
-        property
+    Generate a random CAN message.
     """
-    return property(fget=lambda _: value)
+    message_id = randint(1, 25)
+    data_length = randint(1, 8)
+    data = (randint(0, 255) for _ in range(data_length))
+    return Message(arbitration_id=message_id, data=data)
 
 
 class Percentage:
@@ -49,28 +49,3 @@ class Percentage:
             int: Original value
         """
         return int((percentage * total) / 100.0)
-
-
-class StoppableThread(threading.Thread):
-    """
-    Basic thread that can be stopped during long running loops.
-
-    StoppableThread.cancel should be used as the while loop flag.
-
-    threading.current_thread can be used to access the thread from
-    within the target function.
-
-    Excample:
-
-        while not current_thread().cancel.wait(1):
-            ...
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.cancel = threading.Event()
-
-    def stop(self):
-        self.cancel.set()
-        self.join()
