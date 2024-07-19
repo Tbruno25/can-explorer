@@ -3,6 +3,7 @@ from __future__ import annotations
 import enum
 
 import can
+from can.bus import BusABC
 
 from can_explorer.configs import Default
 from can_explorer.models import PlotModel
@@ -19,7 +20,7 @@ class Controller:
         self,
         model: PlotModel,
         view: MainView,
-        bus: can.bus.BusABC | None = None,
+        bus: BusABC | None = None,
         refresh_rate: float | None = Default.REFRESH_RATE,
     ) -> None:
         self.model = model
@@ -35,7 +36,7 @@ class Controller:
         return self._state
 
     @property
-    def bus(self) -> can.bus.BusABC | None:
+    def bus(self) -> BusABC:
         if self._bus is None:
             raise RuntimeError("Must apply settings before starting")
         return self._bus
@@ -43,7 +44,7 @@ class Controller:
     def is_active(self) -> bool:
         return bool(self.state)
 
-    def set_bus(self, bus: can.BusABC) -> None:
+    def set_bus(self, bus: BusABC) -> None:
         """
         Set CAN bus to use during controller loop.
         """

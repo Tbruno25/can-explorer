@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from typing import DefaultDict
 
 import can
 
@@ -22,7 +23,7 @@ class PayloadBuffer(deque):
 
 class PlotModel:
     def __init__(self) -> None:
-        self._data = defaultdict(PayloadBuffer)
+        self._data: DefaultDict[int, PayloadBuffer] = defaultdict(PayloadBuffer)
         self._len = Default.BUFFER_SIZE
 
     def add_message(self, message: can.Message) -> None:
