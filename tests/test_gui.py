@@ -1,9 +1,10 @@
 import multiprocessing as mp
 import os
 import sys
+import time
 from functools import partial
 from pathlib import Path
-from time import sleep
+from random import randint
 
 import dearpygui.dearpygui as dpg
 import pyautogui
@@ -46,7 +47,7 @@ def virtual_display():
         display = SmartDisplay(visible=True, use_xauth=True)
         display.start()
 
-        yield
+        yield display
 
         display.stop()
 
@@ -56,7 +57,7 @@ def process(virtual_display):
     app = CanExplorer()
     proc = mp.Process(target=app.run, args=(demo_config,))
     proc.start()
-    sleep(1)
+    time.sleep(1)
 
     yield
 
@@ -82,29 +83,42 @@ def virtual_gui(request, process):
 
 
 def test_gui_launch(app, controller, tag):
+    app.setup()
+
     assert dpg.is_dearpygui_running()
 
-    # Check if the main window was created
     assert dpg.does_item_exist(tag.header)
     assert dpg.does_item_exist(tag.body)
     assert dpg.does_item_exist(tag.footer)
 
-    # Check if key UI elements exist
     assert dpg.does_item_exist(tag.main_button)
     assert dpg.does_item_exist(tag.clear_button)
     assert dpg.does_item_exist(tag.plot_buffer_slider)
     assert dpg.does_item_exist(tag.plot_height_slider)
 
-    # Check if the settings tab exists
     assert dpg.does_item_exist(tag.settings_tab)
 
-    # Verify initial state
     assert not controller.is_active()
     assert dpg.get_item_label(tag.main_button) == "Start"
 
 
 def test_gui_visualizes_traffic(virtual_gui):
     pyautogui.click(pyautogui.locate(Gui.Button.START))
-    sleep(1)
+    time.sleep(1)
     viewer_traffic = pyautogui.locate(Gui.Acceptance.VISUALIZES_TRAFFIC, confidence=0.5)
     assert viewer_traffic is not None
+
+
+def test_rapid_gui_interaction(app, controller, sim_log, tag, virtual_display):
+    app.run()
+    time.sleep(1)
+    controller.start_stop_button_callback()
+    assert controller.is_active()
+
+    for _ in range(25):
+        dpg.set_value(tag.plot_buffer_slider, randint(10, 100))
+        controller.plot_buffer_slider_callback()
+
+        dpg.set_value(tag.plot_height_slider, randint(10, 100))
+        controller.plot_height_slider_callback()
+        controller.clear_button_callback()

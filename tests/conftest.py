@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+from threading import Thread
 from unittest.mock import MagicMock
 
 import can
@@ -18,6 +21,16 @@ def vbus2():
     bus = can.interface.Bus(interface="virtual", channel="pytest")
     yield bus
     bus.shutdown()
+
+
+@pytest.fixture
+def sim_log():
+    log_file = (
+        Path(__file__).parents[1] / "src" / "can_explorer" / "resources" / "ic_sim.log"
+    )
+    # Play simulated logfile
+    sys.argv = [sys.argv[0], "-i", "virtual", "-c", "pytest", str(log_file)]
+    Thread(target=can.player.main, daemon=True).start()
 
 
 @pytest.fixture
@@ -43,7 +56,11 @@ def tag():
 @pytest.fixture
 def app(controller, tag):
     _app = CanExplorer(controller=controller, tags=tag)
-    _app.setup()
+
+    # Test purposes only so run is non-blocking
+    thread = Thread(target=_app.run)
+    _app.run = thread.start
+
     yield _app
     _app.teardown()
 
