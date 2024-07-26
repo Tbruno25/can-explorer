@@ -90,16 +90,18 @@ class CanExplorer:
         self.view.popup_error(name=exc_type.__name__, info=exc_value)
 
     def run(self, test_config: Callable | None = None, show: bool = True):
-        self.setup()
+        try:
+            self.setup()
 
-        if test_config:
-            test_config(self)
+            if test_config:
+                test_config(self)
 
-        sys.excepthook = self.exception_handler
+            sys.excepthook = self.exception_handler
 
-        if show:
-            dpg.show_viewport()
+            if show:
+                dpg.show_viewport()
 
-        dpg.start_dearpygui()
+            dpg.start_dearpygui()
 
-        self.teardown()
+        finally:
+            self.teardown()
