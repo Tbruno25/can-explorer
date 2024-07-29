@@ -5,20 +5,35 @@ import time
 from unittest.mock import patch
 
 import dearpygui.dearpygui as dpg
+import pyautogui
 from can_explorer import CanExplorer
 
 WITHIN_CI = os.getenv("GITHUB_ACTIONS")
 
 
-def simulate_click(button_tag):
-    # Simulate the button press
-    dpg.configure_item(button_tag, state=dpg.mvGuiState_Pressed)
-    dpg.split_frame()  # Process a single frame to update the UI
-    # Simulate the button release
-    dpg.configure_item(button_tag, state=dpg.mvGuiState_None)
-    dpg.split_frame()  # Process a single frame to update the UI
-    # Trigger the button's callback
-    dpg.run_callbacks(dpg.mvMouseButton_Left, button_tag, None)
+def get_button_click_coordinates():
+    # Get GUI window position
+    gui_x, gui_y = dpg.get_viewport_pos()
+
+    button_coordinates = []
+
+    # Iterate through all items in the registry
+    for item in dpg.get_all_items():
+        if dpg.get_item_type(item) == "mvAppItemType::mvButton":
+            # Get button position and dimensions using rect_min and rect_max
+            button_min_x, button_min_y = dpg.get_item_rect_min(item)
+            button_max_x, button_max_y = dpg.get_item_rect_max(item)
+
+            # Calculate button center
+            button_center_x = (button_min_x + button_max_x) / 2
+            button_center_y = (button_min_y + button_max_y) / 2
+
+            # Calculate absolute screen coordinates for button center
+            abs_x = gui_x + button_center_x
+            abs_y = gui_y + button_center_y
+
+            button_coordinates.append((item, abs_x, abs_y))
+    return button_coordinates
 
 
 class CanExplorerTestWrapper:
@@ -29,7 +44,10 @@ class CanExplorerTestWrapper:
         self.result_queue = mp.Queue()
 
     def click_main_button(self):
-        simulate_click(self.tag.main_button)
+        buttons = get_button_click_coordinates()
+        for button, x, y in buttons:
+            if button == self.tag.main_button:
+                pyautogui.click(x, y)
 
     def command_loop(self):
         while dpg.is_dearpygui_running():

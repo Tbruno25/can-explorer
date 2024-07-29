@@ -33,7 +33,7 @@ def save_screenshot(request, path: Path = Path("screenshots")) -> None:
     screenshot.save(str(path / f"{HOST_OS}_{major}-{minor}-{micro}_{name}.png"))
 
 
-@pytest.fixture(autouse=True)
+@pytest.fixture
 def virtual_display():
     if HOST_OS == "windows":
         # Virtual display not needed

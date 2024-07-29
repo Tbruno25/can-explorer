@@ -4,6 +4,7 @@ from threading import Thread
 from unittest.mock import MagicMock
 
 import can
+import can.player
 import pytest
 from can_explorer import CanExplorer, Controller, MainView, PlotModel
 from can_explorer.tags import Tag
