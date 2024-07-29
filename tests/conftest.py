@@ -8,6 +8,8 @@ import pytest
 from can_explorer import CanExplorer, Controller, MainView, PlotModel
 from can_explorer.tags import Tag
 
+from .resources import CanExplorerTestWrapper, TestCommander
+
 
 @pytest.fixture
 def vbus():
@@ -57,12 +59,19 @@ def tag():
 def app(controller, tag):
     _app = CanExplorer(controller=controller, tags=tag)
 
-    # Test purposes only so run is non-blocking
-    thread = Thread(target=_app.run)
-    _app.run = thread.start
-
     yield _app
+
     _app.teardown()
+
+
+@pytest.fixture
+def tester(app):
+    wrapper = CanExplorerTestWrapper(app)
+    commander = TestCommander(wrapper)
+
+    yield commander
+
+    commander.stop_gui()
 
 
 @pytest.fixture
