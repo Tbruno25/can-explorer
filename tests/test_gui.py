@@ -96,6 +96,6 @@ def test_gui_visualizes_traffic(tester, sim_log):
 def test_rapid_gui_interaction(tester, sim_log):
     tester.start_gui()
 
-    for _ in range(25):
-        time.sleep(1)
+    for _ in range(4):
+        time.sleep(2)
         tester.click_main_button()

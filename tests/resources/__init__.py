@@ -8,6 +8,10 @@ import dearpygui.dearpygui as dpg
 import pyautogui
 from can_explorer import CanExplorer
 
+pyautogui.PAUSE = 0
+pyautogui.MINIMUM_DURATION = 0
+
+
 WITHIN_CI = os.getenv("GITHUB_ACTIONS")
 
 
@@ -19,7 +23,7 @@ def get_button_click_coordinates():
 
     # Iterate through all items in the registry
     for item in dpg.get_all_items():
-        if dpg.get_item_type(item) == "mvAppItemType::mvButton":
+        if "mvButton" in dpg.get_item_type(item):
             # Get button position and dimensions using rect_min and rect_max
             button_min_x, button_min_y = dpg.get_item_rect_min(item)
             button_max_x, button_max_y = dpg.get_item_rect_max(item)
@@ -36,6 +40,49 @@ def get_button_click_coordinates():
     return button_coordinates
 
 
+def get_slider_info():
+    """
+    Retrieves information about sliders in the current Dear PyGUI application.
+
+    Returns:
+        list: A list of tuples containing slider information:
+            (item_id, min_value, max_value, current_value, center_x, center_y)
+    """
+
+    slider_info = []
+
+    # Get GUI window position
+    gui_x, gui_y = dpg.get_viewport_pos()
+
+    for item in dpg.get_all_items():
+        if (
+            dpg.get_item_type(item) == "mvAppItemType::mvSliderFloat"
+        ):  # Adjust for int sliders if needed
+            # Get slider position and dimensions
+            button_min_x, button_min_y = dpg.get_item_rect_min(item)
+            button_max_x, button_max_y = dpg.get_item_rect_max(item)
+
+            # Calculate slider center
+            button_center_x = (button_min_x + button_max_x) / 2
+            button_center_y = (button_min_y + button_max_y) / 2
+
+            # Calculate absolute screen coordinates for slider center
+            abs_x = gui_x + button_center_x
+            abs_y = gui_y + button_center_y
+
+            # Get slider values
+            config = dpg.get_item_configuration(item)
+            min_value = config["min_value"]
+            max_value = config["max_value"]
+            current_value = dpg.get_value(item)
+
+            slider_info.append(
+                (item, min_value, max_value, current_value, abs_x, abs_y)
+            )
+
+    return slider_info
+
+
 class CanExplorerTestWrapper:
     def __init__(self, app: CanExplorer):
         self.app = app
@@ -47,7 +94,17 @@ class CanExplorerTestWrapper:
         buttons = get_button_click_coordinates()
         for button, x, y in buttons:
             if button == self.tag.main_button:
-                pyautogui.click(x, y)
+                p = pyautogui.position()
+                pyautogui.moveTo(x, y)
+                dpg.render_dearpygui_frame()
+                pyautogui.mouseDown()
+                dpg.render_dearpygui_frame()
+                pyautogui.mouseUp()
+                dpg.render_dearpygui_frame()
+                pyautogui.moveTo(*p)
+                dpg.render_dearpygui_frame()
+
+    # set up a command pattern so rendering happens after each line
 
     def command_loop(self):
         while dpg.is_dearpygui_running():
