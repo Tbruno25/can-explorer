@@ -34,7 +34,7 @@ class Percentage:
         Returns:
             int: Percentage
         """
-        return int(100 * n1 / n2)
+        return int(round(100 * n1 / n2))
 
     @staticmethod
     def reverse(percentage: float, total: float) -> int:
@@ -48,4 +48,4 @@ class Percentage:
         Returns:
             int: Original value
         """
-        return int((percentage * total) / 100.0)
+        return int(round((percentage * total) / 100.0))

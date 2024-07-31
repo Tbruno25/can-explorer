@@ -9,8 +9,6 @@ import pytest
 from can_explorer import CanExplorer, Controller, MainView, PlotModel
 from can_explorer.tags import Tag
 
-from .resources import CanExplorerTestWrapper, TestCommander
-
 
 @pytest.fixture
 def vbus():
@@ -65,14 +63,9 @@ def app(controller, tag):
     _app.teardown()
 
 
-@pytest.fixture
-def tester(app):
-    wrapper = CanExplorerTestWrapper(app)
-    commander = TestCommander(wrapper)
-
-    yield commander
-
-    commander.stop_gui()
+@pytest.fixture(autouse=True)
+def set_tester_target(dpgtester, app):
+    dpgtester.set_target(app.run)
 
 
 @pytest.fixture

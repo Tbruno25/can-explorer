@@ -27,6 +27,8 @@ pyvirtualdisplay = [
     {version = "^3.0", platform = "darwin"},
 ]
 msvc-runtime = {version = "^14.34.31931", platform = "windows"}
+python-xlib = "^0.33"
+pytest-dpg = "^0.1.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
