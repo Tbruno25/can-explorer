@@ -8,13 +8,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
       with:
         cache: 'pip'
-    - uses: pre-commit/action@v3.0.0
-      with:
-        extra_args: --hook-stage manual --all-files
+    - uses: pre-commit/action@v3.0.1
 
   test:
     runs-on: ${{ matrix.os }}
@@ -22,55 +20,47 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        # Temporarily limit versions
-        # https://github.com/python-poetry/poetry/issues/8139
-        python-version: ['3.10', '3.11', '3.12'] # '3.8', '3.9', 
+        python-version: ['3.10', '3.11', '3.12']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
-    - uses: actions/setup-python@v4
+    - uses: actions/setup-python@v5
       with:
-        # https://github.com/actions/setup-python/issues/369
         python-version: ${{ matrix.python-version }}
-        cache: 'pip'
+    
+    - run: echo ${{ matrix.python-version }} >> .python-version
 
-    - name: Install poetry
-      run: pip install poetry 
-
-    - uses: actions/cache@v3
-      with:
-        path: ${{ env.pythonLocation }}
-        key: ${{ runner.os }}-python-${{ env.pythonLocation }}-${{ hashFiles('poetry.lock') }}
+    - name: Install rye
+      uses: eifinger/setup-rye@v4
 
     - name: Install dependencies
-    # https://github.com/nektos/act/issues/1639
-      run: poetry install --no-ansi
+      run: rye sync
 
     - name: Test linux
       if: runner.os == 'Linux'
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
         command: |
           sudo apt-get install -y xvfb xserver-xephyr scrot gnome-screenshot
           mkdir -p screenshots
-          xvfb-run -a poetry run pytest -v
+          xvfb-run -a rye test -v
 
     - name: Test windows
       if: runner.os == 'Windows'
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
         command: |
           mkdir -p screenshots
-          poetry run pytest -v
+          rye test -v
 
     - name: Test mac [1]
       if: runner.os == 'macOS'
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
@@ -81,7 +71,7 @@ jobs:
 
     - name: Test mac [2]
       if: runner.os == 'macOS'
-      uses: nick-fields/retry@v2
+      uses: nick-fields/retry@v3
       with:
         timeout_minutes: 10
         max_attempts: 3
@@ -89,7 +79,7 @@ jobs:
           mkdir -p screenshots
           Xvfb :1 & 
           export DISPLAY=":1"
-          poetry run pytest -v
+          rye test -v
 
     - name: Upload screenshots
       uses: actions/upload-artifact@v3
@@ -98,8 +88,8 @@ jobs:
         name: screenshots
         path: screenshots/*.png
 
-    - name: Setup tmate session
-      # Enables ssh session during manually triggered ci runs
-      uses: mxschmitt/action-tmate@v3
-      if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
+    # - name: Setup tmate session
+    #   # Enables ssh session during manually triggered ci runs
+    #   uses: mxschmitt/action-tmate@v3
+    #   if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
 

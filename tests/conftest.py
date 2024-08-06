@@ -3,6 +3,7 @@ from unittest.mock import MagicMock
 import can
 import pytest
 from can_explorer import CanExplorer, Controller, MainView, PlotModel
+from can_explorer.resources.demo import demo_config
 from can_explorer.tags import Tag
 
 
@@ -46,6 +47,16 @@ def app(controller, tag):
     _app.setup()
     yield _app
     _app.teardown()
+
+
+@pytest.fixture(autouse=True)
+def set_dpgtester_target(app, dpgtester):
+    def func():
+        demo_config(app)
+        app.run()
+
+    dpgtester.set_target(func)
+    yield
 
 
 @pytest.fixture

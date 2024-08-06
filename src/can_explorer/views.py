@@ -43,7 +43,7 @@ class PlotView:
             self.remove(self._row_keys[0])
 
     def get_rows(self) -> dict:
-        return dict(zip(self._row_keys, self._row_values))
+        return dict(zip(self._row_keys, self._row_values, strict=False))
 
     @synchronized
     def remove(self, can_id: int) -> None:
