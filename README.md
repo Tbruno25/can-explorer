@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=Tbruno25&project=can-explorer&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 <h1 align="center">
   <a href="https://github.com/tbruno25/can-explorer">
     <!-- Please provide path to your logo here -->
