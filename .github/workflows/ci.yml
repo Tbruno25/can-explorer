@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.11', '3.12']
 
     steps:
     - uses: actions/checkout@v4
@@ -32,10 +32,10 @@ jobs:
     - run: echo ${{ matrix.python-version }} >> .python-version
 
     - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      uses: astral-sh/setup-uv@v7
 
     - name: Install dependencies
-      run: uv sync --extra dev
+      run: uv sync --group dev
 
     - name: Test linux
       if: runner.os == 'Linux'
@@ -87,9 +87,3 @@ jobs:
       with:
         name: screenshots-${{ matrix.os }}-${{ matrix.python-version }}
         path: screenshots/*.png
-
-    # - name: Setup tmate session
-    #   # Enables ssh session during manually triggered ci runs
-    #   uses: mxschmitt/action-tmate@v3
-    #   if: ${{ failure() && github.event_name == 'workflow_dispatch' }}
-
