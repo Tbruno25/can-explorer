@@ -43,9 +43,7 @@ class PlotItem(str):
             tag=str(generate_tag()),
             no_title=True,
             no_menus=True,
-            no_child=True,
             no_mouse_pos=True,
-            no_highlight=True,
             no_box_select=True,
         ) as plot:
             plot = super().__new__(cls, plot)
