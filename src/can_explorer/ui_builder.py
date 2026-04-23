@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
-from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.configs import Default
 from can_explorer.resources import Percentage
