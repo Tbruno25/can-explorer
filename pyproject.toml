@@ -1,6 +1,6 @@
 [project]
 name = "can-explorer"
-version = "0.2.2"
+version = "0.2.3"
 description = "Visualize CAN bus payloads in real time"
 authors = [
     { name = "TJ", email = "tbruno25@gmail.com" }
@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "pyserial>=3.5",
     "python-can>=4.0.0",
-    "dearpygui>=1.9.0, <2.0.0",
+    "dearpygui>=2.0.0",
     "dearpygui-ext>=0.9.0, <2.0.0",
 ]
 readme = "README.md"
@@ -20,6 +20,8 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 
 [project.urls]
