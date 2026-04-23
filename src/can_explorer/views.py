@@ -159,6 +159,7 @@ class MainView:
             self.tag.body,
             (
                 dpg.get_viewport_height()
+                - dpg.get_item_height(self.tag.header)
                 - dpg.get_item_height(self.tag.footer)
                 - Default.FOOTER_OFFSET
             ),

@@ -3,7 +3,6 @@ from typing import Final
 from can.interfaces import VALID_INTERFACES
 
 from can_explorer.resources import DIR_PATH as RESOURCES_DIR
-from can_explorer.resources import HOST_OS
 
 
 class Default:
@@ -22,7 +21,7 @@ class Default:
     PLOT_COLUMN_WIDTH: Final = 85
     TITLE: Final = "CAN Explorer"
     FONT: Final = RESOURCES_DIR / "Inter-Medium.ttf"
-    FOOTER_OFFSET: Final = 50 if HOST_OS == "linux" else 85
+    FOOTER_OFFSET: Final = 50
 
 
 class CANBus:

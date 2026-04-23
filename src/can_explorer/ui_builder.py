@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import dearpygui.dearpygui as dpg
-from dearpygui_ext.themes import create_theme_imgui_light
 
 from can_explorer.configs import Default
 from can_explorer.resources import Percentage
@@ -17,7 +16,6 @@ class Font:
 @dataclass
 class Theme:
     default: int
-    light: int
 
 
 class UIBuilder:
@@ -123,9 +121,7 @@ class UIBuilder:
                 dpg.add_theme_color(dpg.mvThemeCol_ButtonHovered, Default.BACKGROUND)
                 dpg.add_theme_color(dpg.mvThemeCol_ButtonActive, Default.BACKGROUND)
 
-            self._parent.theme = Theme(
-                default=default, light=create_theme_imgui_light()
-            )
+            self._parent.theme = Theme(default=default)
 
         dpg.bind_theme(self._parent.theme.default)
 
@@ -145,15 +141,6 @@ class UIBuilder:
                     ["Hex", "Dec"],
                     tag=self.tag.settings_id_format,
                     horizontal=True,
-                )
-            with dpg.group(horizontal=True):
-                dpg.add_text("Theme")
-                dpg.add_radio_button(
-                    ["Default", "Light"],
-                    horizontal=True,
-                    callback=lambda sender: dpg.bind_theme(
-                        getattr(self.theme, dpg.get_value(sender).lower())
-                    ),
                 )
 
             dpg.add_button(
